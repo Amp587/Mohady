@@ -2,9 +2,11 @@
 <html>
 <head>
 <title>GAME RAKSASA</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <style>
-body{margin:0;background:linear-gradient(#1e3c72,#2a5298);overflow:hidden;font-family:'Arial Black';user-select:none}
+body{margin:0;background:linear-gradient(#1e3c72,#2a5298);overflow:hidden;font-family:'Arial Black';user-select:none;height:100vh} /* TAMBAH height:100vh */
+html,body{height:100%} /* TAMBAH INI */
+#c{display:block;width:100%;height:100vh} /* TAMBAH INI BIAR CANVAS FULL */
 #hud{position:absolute;top:10px;left:10px;color:yellow;font-size:24px;text-shadow:2px 2px black;z-index:5}
 #credit{position:absolute;top:42px;left:10px;color:#00ffff;font-size:18px;font-weight:bold;text-shadow:2px 2px black;z-index:5;font-style:italic}
 #sizeBar{position:absolute;top:70px;left:10px;width:200px;height:15px;background:#333;border:2px solid white;border-radius:10px;z-index:5}
@@ -34,7 +36,14 @@ body{margin:0;background:linear-gradient(#1e3c72,#2a5298);overflow:hidden;font-f
 <canvas id="c"></canvas>
 <script>
 let c=document.getElementById('c'),x=c.getContext('2d');
-c.width=innerWidth;c.height=innerHeight;
+
+// INI KUNCINYA BOS - BIAR FULL DI HP
+function resize(){
+  c.width=window.innerWidth;
+  c.height=window.innerHeight;
+}
+resize(); // jalanin pertama kali
+window.addEventListener('resize', resize); // kalau HP diputer
 
 let px=c.width/2,py=c.height-100;
 let ukuran=1; 
@@ -115,7 +124,7 @@ document.getElementById('btnStop').ontouchstart=e=>{e.preventDefault();stopGame(
 function startGame(){
   if(gameJalan) return;
   gameJalan=true; skor=0; ammo=999; musuh=[]; peluru=[]; boom=[];
-  ukuran=1; kill=0; px=c.width/2;
+  ukuran=1; kill=0; px=c.width/2; py=c.height-100; // py ikut resize
   document.getElementById('sizeFill').style.width = '0%';
   for(let i=0;i<8;i++)musuh.push({x:Math.random()*c.width,y:-Math.random()*300,w:30,h:60,s:3+Math.random()*4})
   spawnMusuh=setInterval(()=>{if(gameJalan){
