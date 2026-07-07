@@ -42,6 +42,9 @@ function resize(){
 resize();
 window.addEventListener('resize', resize);
 
+// CEK APAKAH HP
+let isMobile = window.innerWidth < 768;
+
 let px = c.width/2;
 let py = c.height - 180;
 let ukuran = 1; 
@@ -130,13 +133,18 @@ function startGame(){
   gameJalan=true; skor=0; ammo=999; musuh=[]; peluru=[]; boom=[];
   ukuran=1; kill=0; px=c.width/2; py=c.height-180;
   document.getElementById('sizeFill').style.width = '0%';
-  for(let i=0; i<8; i++) musuh.push({x:Math.random()*c.width, y:-Math.random()*300, w:30, h:60, s:3+Math.random()*4})
+  for(let i=0; i<5; i++) musuh.push({x:Math.random()*c.width, y:-Math.random()*300, w:30, h:60, s:3+Math.random()*4})
+  
+  // KECEPATAN SPAWN: HP LEBIH LAMA
+  let spawnSpeed = isMobile ? 400 : 180; // HP 400ms, PC 180ms
+  
   spawnMusuh = setInterval(()=>{
     if(gameJalan){
       musuh.push({x:Math.random()*c.width, y:-80, w:30, h:60, s:3+Math.random()*4})
-      if(Math.random()<0.5) musuh.push({x:Math.random()*c.width, y:-80, w:30, h:60, s:3+Math.random()*4})
+      // DI HP CUMA SPAWN 1, DI PC BISA 2
+      if(!isMobile && Math.random()<0.5) musuh.push({x:Math.random()*c.width, y:-80, w:30, h:60, s:3+Math.random()*4})
     }
-  },180);
+  }, spawnSpeed);
   main();
 }
 
