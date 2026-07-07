@@ -4,20 +4,25 @@
 <title>GAME RAKSASA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <style>
-body{margin:0;background:linear-gradient(#1e3c72,#2a5298);overflow:hidden;font-family:'Arial Black';user-select:none;height:100vh} /* TAMBAH height:100vh */
-html,body{height:100%} /* TAMBAH INI */
-#c{display:block;width:100%;height:100vh} /* TAMBAH INI BIAR CANVAS FULL */
+body{margin:0;background:linear-gradient(#1e3c72,#2a5298);overflow:hidden;font-family:'Arial Black';user-select:none;height:100vh}
+html,body{height:100%}
+#c{display:block;width:100%;height:100vh}
+
 #hud{position:absolute;top:10px;left:10px;color:yellow;font-size:24px;text-shadow:2px 2px black;z-index:5}
 #credit{position:absolute;top:42px;left:10px;color:#00ffff;font-size:18px;font-weight:bold;text-shadow:2px 2px black;z-index:5;font-style:italic}
 #sizeBar{position:absolute;top:70px;left:10px;width:200px;height:15px;background:#333;border:2px solid white;border-radius:10px;z-index:5}
 #sizeFill{height:100%;background:linear-gradient(yellow,orange);border-radius:8px;width:0%}
-.btn{position:absolute;bottom:15px;width:70px;height:70px;background:rgba(0,0,0,0.85);color:white;border:3px solid white;border-radius:20px;font-size:26px;font-weight:bold;display:flex;align-items:center;justify-content:center;z-index:10;touch-action:none}
-#btnKiri{left:15px;}
-#btnKanan{left:95px;}
-#btnTembak{left:175px;width:90px;height:90px;background:rgba(255,0,0,1);font-size:16px}
-.btnKecil{position:absolute;top:15px;width:65px;height:40px;background:rgba(0,150,0,0.9);color:white;border:2px solid white;border-radius:12px;font-size:14px;font-weight:bold;display:flex;align-items:center;justify-content:center;z-index:10;touch-action:none}
-#btnStart{right:90px;}
-#btnStop{right:15px;width:65px;height:40px;background:rgba(255,0,0,0.9);font-size:14px}
+
+/* TOMBOL DIBESARIN BUAT HP */
+.btn{position:absolute;bottom:25px;width:90px;height:90px;background:rgba(0,0,0,0.9);color:white;border:4px solid white;border-radius:25px;font-size:32px;font-weight:bold;display:flex;align-items:center;justify-content:center;z-index:10;touch-action:none}
+#btnKiri{left:20px;}
+#btnKanan{left:120px;}
+#btnTembak{right:20px;width:110px;height:110px;background:rgba(255,0,0,1);font-size:18px} /* PINDAH KE KANAN + GEDE */
+
+.btnKecil{position:absolute;top:15px;width:80px;height:50px;background:rgba(0,150,0,0.9);color:white;border:3px solid white;border-radius:15px;font-size:16px;font-weight:bold;display:flex;align-items:center;justify-content:center;z-index:10;touch-action:none}
+#btnStart{right:105px;}
+#btnStop{right:15px;width:80px;height:50px;background:rgba(255,0,0,0.9);font-size:16px}
+
 .btn:active,.btnKecil:active{background:rgba(255,255,0,1);transform:scale(0.9)}
 </style>
 </head>
@@ -37,15 +42,15 @@ html,body{height:100%} /* TAMBAH INI */
 <script>
 let c=document.getElementById('c'),x=c.getContext('2d');
 
-// INI KUNCINYA BOS - BIAR FULL DI HP
 function resize(){
   c.width=window.innerWidth;
   c.height=window.innerHeight;
 }
-resize(); // jalanin pertama kali
-window.addEventListener('resize', resize); // kalau HP diputer
+resize();
+window.addEventListener('resize', resize);
 
-let px=c.width/2,py=c.height-100;
+let px=c.width/2;
+let py=c.height-150; // NAEKIN 50PX BIAR GA KETUTUP TOMBOL
 let ukuran=1; 
 let kill=0;
 let musuh=[],peluru=[],boom=[],salju=[],skor=0,ammo=999;
@@ -124,7 +129,7 @@ document.getElementById('btnStop').ontouchstart=e=>{e.preventDefault();stopGame(
 function startGame(){
   if(gameJalan) return;
   gameJalan=true; skor=0; ammo=999; musuh=[]; peluru=[]; boom=[];
-  ukuran=1; kill=0; px=c.width/2; py=c.height-100; // py ikut resize
+  ukuran=1; kill=0; px=c.width/2; py=c.height-150; // INI JUGA DIUBAH
   document.getElementById('sizeFill').style.width = '0%';
   for(let i=0;i<8;i++)musuh.push({x:Math.random()*c.width,y:-Math.random()*300,w:30,h:60,s:3+Math.random()*4})
   spawnMusuh=setInterval(()=>{if(gameJalan){
