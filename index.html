@@ -56,6 +56,7 @@ let py = c.height - 180;
  
 let kill = 0;
 let musuh = [], peluru = [], boom = [], salju = [], skor = 0, ammo = 999;
+ Let darahItem = []; 
 let gerakKiri = false, gerakKanan = false, gameJalan = false;
 let spawnMusuh;
 
@@ -81,7 +82,7 @@ function gambarPlayer(px,py){
   let w = 28 * scale;
   let h = 35 * scale;
   let kakiY = py; // Kaki paten di py
-  
+  let py= kakiy-h/2:// geser titik tengah ke atas
   x.strokeStyle='#FFFF00'; x.lineWidth=5*scale;
   x.fillStyle='#FFFF00';
   
@@ -200,6 +201,31 @@ function main(){
     if(s.y>c.height){s.y=0; s.x=Math.random()*c.width;}
   })
 
+ // SPAWN ITEM DARAH
+if(Math.random() < 0.02){ 
+    darahItem.push({x: Math.random()*c.width, y: 0, r: 12});
+}
+
+// GAMBAR + CEK AMBIL DARAH
+for(let i=darahItem.length-1; i>=0; i--){
+    let d = darahItem[i];
+    d.y += 2; // jatuh ke bawah
+    
+    // gambar hati merah
+    x.fillStyle = "red";
+    x.beginPath();
+    x.arc(d.x, d.y, d.r, 0, Math.PI*2);
+    x.fill();
+    
+    // KALAU KENA PLAYER
+    if(Math.hypot(px-d.x, py-d.y) < 25){
+        hp = Math.min(100, hp + 20); // <- INI "hp + 20"
+        ukuran += 0.2;
+        py = c.height - 180 * ukuran; // biar kaki napak
+        darahItem.splice(i,1);
+    }
+    if(d.y > c.height) darahItem.splice(i,1);
+} 
   let kecepatan = 10 - ukuran*2;
   if(gerakKiri && px > 30*ukuran) px -= kecepatan;
   if(gerakKanan && px < c.width - 30*ukuran) px += kecepatan;
