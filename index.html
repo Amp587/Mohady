@@ -34,47 +34,232 @@ html,body{height:100%}
 <script>
 let c = document.getElementById('c');
 let x = c.getContext('2d');
+
 let ukuran = 1;
-function resize(){c.width = window.innerWidth; c.height = window.innerHeight;}
-resize(); window.addEventListener('resize', resize);
-let isMobile = window.innerWidth < 768;
-let px = c.width/2; let py = c.height - 180;
-let kill = 0; let musuh = [], peluru = [], boom = [], salju = [], skor = 0, nyawa = 100, darahItem = [], ammo = 999;
-let gerakKiri = false, gerakKanan = false, gameJalan = false; let spawnMusuh;
-for(let i=0; i<100; i++){salju.push({x:Math.random()*c.width, y:Math.random()*c.height, r:Math.random()*3+1, s:Math.random()*2+1, w:Math.random()*0.5-0.25})}
-let audioCtx;
-function suara(tipe){if(!gameJalan) return; if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); let o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); if(tipe=='tembak'){o.type='square';o.frequency.value=1000;g.gain.setValueAtTime(0.3,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.05)} if(tipe=='kena'){o.type='sawtooth';o.frequency.value=150;g.gain.setValueAtTime(0.5,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.2)} if(tipe=='isi'){o.type='sine';o.frequency.value=600;g.gain.setValueAtTime(0.4,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.2)} if(tipe=='raksasa'){o.type='sawtooth';o.frequency.value=80;g.gain.setValueAtTime(0.8,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.8)} o.start(); o.stop(audioCtx.currentTime+0.8);}
-function gambarPlayer(px,py){var s = ukuran; x.fillStyle = 'yellow'; x.strokeStyle = 'black'; x.lineWidth = 2*s; x.fillRect(px-12*s, py-40*s, 24*s, 24*s); x.fillStyle = 'black'; x.fillRect(px-7*s, py-33*s, 4*s, 4*s); x.fillRect(px+3*s, py-33*s, 4*s, 4*s); x.fillStyle = 'yellow'; x.fillRect(px-15*s, py-16*s, 30*s, 25*s); x.fillRect(px-22*s, py-10*s, 7*s, 15*s); x.fillRect(px+15*s, py-10*s, 7*s, 15*s); x.fillRect(px-12*s, py+9*s, 9*s, 18*s); x.fillRect(px+3*s, py+9*s, 9*s, 18*s);}
-function gambarMusuh(px,py){x.strokeStyle='#FF69B4'; x.lineWidth=3; x.beginPath(); x.arc(px, py-25, 10, 0, 6.28); x.stroke(); x.beginPath(); x.moveTo(px-6, py-28); x.lineTo(px-10, py-38); x.stroke(); x.beginPath(); x.moveTo(px+6, py-28); x.lineTo(px+10, py-38); x.stroke(); x.beginPath(); x.moveTo(px, py-15); x.lineTo(px, py+15); x.stroke(); x.beginPath(); x.moveTo(px, py-5); x.lineTo(px-12, py+5); x.stroke(); x.beginPath(); x.moveTo(px, py-5); x.lineTo(px+12, py+5); x.stroke(); x.beginPath(); x.moveTo(px, py+15); x.lineTo(px-8, py+35); x.stroke(); x.beginPath(); x.moveTo(px, py+15); x.lineTo(px+8, py+35); x.stroke();}
-function ledakan(px,py){suara('kena'); for(let i=0; i<25; i++) boom.push({x:px, y:py, vx:(Math.random()-0.5)*10, vy:(Math.random()-0.5)*10, life:35})}
-function updateHUD(){document.getElementById('sizeFill').style.width = (ukuran/3*100) + '%'; document.getElementById('hud').innerText = 'Skor: ' + skor + ' | Peluru: ' + ammo + ' | Darah: ' + nyawa;}
-function cekNaikLevel(){}
-function setGerak(kiri,kanan){ if(gameJalan){gerakKiri=kiri; gerakKanan=kanan} }
-document.getElementById('btnKiri').addEventListener('touchstart',e=>{e.preventDefault(); setGerak(true,false)}); document.getElementById('btnKiri').addEventListener('touchend',e=>{e.preventDefault(); setGerak(false,false)}); document.getElementById('btnKiri').onmousedown=()=>setGerak(true,false); document.getElementById('btnKiri').onmouseup=()=>setGerak(false,false);
-document.getElementById('btnKanan').addEventListener('touchstart',e=>{e.preventDefault(); setGerak(false,true)}); document.getElementById('btnKanan').addEventListener('touchend',e=>{e.preventDefault(); setGerak(false,false)}); document.getElementById('btnKanan').onmousedown=()=>setGerak(false,true); document.getElementById('btnKanan').onmouseup=()=>setGerak(false,false);
-document.getElementById('btnTembak').addEventListener('touchstart',e=>{e.preventDefault(); tembak()}); document.getElementById('btnTembak').onmousedown=()=>tembak();
-document.getElementById('btnStart').onclick=startGame; document.getElementById('btnStart').ontouchstart=e=>{e.preventDefault(); startGame()}; document.getElementById('btnStop').onclick=stopGame; document.getElementById('btnStop').ontouchstart=e=>{e.preventDefault(); stopGame()};
-function startGame(){
-  if(gameJalan) return; gameJalan=true; skor=0; ammo=999; musuh=[]; peluru=[]; boom=[]; darahItem=[]; ukuran=1; kill=0; nyawa=100; px=c.width/2; py=c.height-180; updateHUD(); document.getElementById('sizeFill').style.width = '0%';
-  for(let i=0; i<3; i++){let speedMusuh = isMobile? 2.5+Math.random()*2 : 1.5+Math.random()*2; musuh.push({x:Math.random()*c.width, y:-Math.random()*300, w:30, h:60, s:speedMusuh})}
-  let spawnSpeed = isMobile? 800 : 400;
-  spawnMusuh = setInterval(()=>{if(gameJalan){let speedMusuh = isMobile? 2.5+Math.random()*2 : 1.5+Math.random()*2; musuh.push({x:Math.random()*c.width, y:-80, w:30, h:60, s:speedMusuh})}}, spawnSpeed); main();
+
+function resize(){
+  c.width = window.innerWidth;
+  c.height = window.innerHeight;
 }
-function stopGame(){gameJalan=false; clearInterval(spawnMusuh); x.clearRect(0,0,c.width,c.height); x.fillStyle='rgba(0,0,0.7)'; x.fillRect(0,0,c.width,c.height); x.fillStyle='white'; x.font='40px Arial Black'; x.textAlign='center'; x.fillText('GAME DI STOP', c.width/2, c.height/2-20); x.font='24px Arial'; x.fillText('Skor Akhir: '+skor, c.width/2, c.height/2+20); x.font='20px Arial'; x.fillText('Create by Mohady', c.width/2, c.height/2+50);}
-function tembak(){if(ammo>0 && gameJalan){peluru.push({x:px, y:py-30-20*ukuran}); ammo--; suara('tembak'); updateHUD();}}
+resize();
+window.addEventListener('resize', resize);
+
+let isMobile = window.innerWidth < 768;
+
+let px = c.width/2;
+let py = c.height - 180;
+
+let kill = 0;
+let musuh = [], peluru = [], boom = [], salju = [], skor = 0, nyawa = 100, darahItem = [], ammo = 999;
+
+let gerakKiri = false, gerakKanan = false, gameJalan = false;
+let spawnMusuh;
+
+for(let i=0; i<100; i++){
+  salju.push({x:Math.random()*c.width, y:Math.random()*c.height, r:Math.random()*3+1, s:Math.random()*2+1, w:Math.random()*0.5-0.25})
+}
+
+let audioCtx;
+function suara(tipe){
+  if(!gameJalan) return;
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  let o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.connect(g); g.connect(audioCtx.destination);
+  if(tipe=='tembak'){o.type='square';o.frequency.value=1000;g.gain.setValueAtTime(0.3,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.05)}
+  if(tipe=='kena'){o.type='sawtooth';o.frequency.value=150;g.gain.setValueAtTime(0.5,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.2)}
+  if(tipe=='isi'){o.type='sine';o.frequency.value=600;g.gain.setValueAtTime(0.4,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.2)}
+  if(tipe=='raksasa'){o.type='sawtooth';o.frequency.value=80;g.gain.setValueAtTime(0.8,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.8)}
+  o.start(); o.stop(audioCtx.currentTime+0.8);
+}
+
+function gambarPlayer(px,py){
+  var s = ukuran;
+  x.fillStyle = 'yellow';
+  x.strokeStyle = 'black';
+  x.lineWidth = 2*s;
+
+  x.fillRect(px-12*s, py-40*s, 24*s, 24*s);
+  x.fillStyle = 'black';
+  x.fillRect(px-7*s, py-33*s, 4*s, 4*s);
+  x.fillRect(px+3*s, py-33*s, 4*s, 4*s);
+  x.fillStyle = 'yellow';
+  x.fillRect(px-15*s, py-16*s, 30*s, 25*s);
+  x.fillRect(px-22*s, py-10*s, 7*s, 15*s);
+  x.fillRect(px+15*s, py-10*s, 7*s, 15*s);
+  x.fillRect(px-12*s, py+9*s, 9*s, 18*s);
+  x.fillRect(px+3*s, py+9*s, 9*s, 18*s);
+}
+
+function gambarMusuh(px,py){
+  x.strokeStyle='#FF69B4'; x.lineWidth=3;
+  x.beginPath(); x.arc(px, py-25, 10, 0, 6.28); x.stroke();
+  x.beginPath(); x.moveTo(px-6, py-28); x.lineTo(px-10, py-38); x.stroke();
+  x.beginPath(); x.moveTo(px+6, py-28); x.lineTo(px+10, py-38); x.stroke();
+  x.beginPath(); x.moveTo(px, py-15); x.lineTo(px, py+15); x.stroke();
+  x.beginPath(); x.moveTo(px, py-5); x.lineTo(px-12, py+5); x.stroke();
+  x.beginPath(); x.moveTo(px, py-5); x.lineTo(px+12, py+5); x.stroke();
+  x.beginPath(); x.moveTo(px, py+15); x.lineTo(px-8, py+35); x.stroke();
+  x.beginPath(); x.moveTo(px, py+15); x.lineTo(px+8, py+35); x.stroke();
+}
+
+function ledakan(px,py){
+  suara('kena');
+  for(let i=0; i<25; i++) boom.push({x:px, y:py, vx:(Math.random()-0.5)*10, vy:(Math.random()-0.5)*10, life:35})
+}
+
+function updateHUD(){
+  document.getElementById('sizeFill').style.width = (ukuran/3*100) + '%';
+  document.getElementById('hud').innerText = 'Skor: ' + skor + ' | Peluru: ' + ammo + ' | Darah: ' + nyawa;
+}
+
+function cekNaikLevel(){}
+
+function setGerak(kiri,kanan){ if(gameJalan){gerakKiri=kiri; gerakKanan=kanan} }
+
+document.getElementById('btnKiri').addEventListener('touchstart',e=>{e.preventDefault(); setGerak(true,false)});
+document.getElementById('btnKiri').addEventListener('touchend',e=>{e.preventDefault(); setGerak(false,false)});
+document.getElementById('btnKiri').onmousedown=()=>setGerak(true,false);
+document.getElementById('btnKiri').onmouseup=()=>setGerak(false,false);
+
+document.getElementById('btnKanan').addEventListener('touchstart',e=>{e.preventDefault(); setGerak(false,true)});
+document.getElementById('btnKanan').addEventListener('touchend',e=>{e.preventDefault(); setGerak(false,false)});
+document.getElementById('btnKanan').onmousedown=()=>setGerak(false,true);
+document.getElementById('btnKanan').onmouseup=()=>setGerak(false,false);
+
+document.getElementById('btnTembak').addEventListener('touchstart',e=>{e.preventDefault(); tembak()});
+document.getElementById('btnTembak').onmousedown=()=>tembak();
+
+document.getElementById('btnStart').onclick=startGame;
+document.getElementById('btnStart').ontouchstart=e=>{e.preventDefault(); startGame()};
+document.getElementById('btnStop').onclick=stopGame;
+document.getElementById('btnStop').ontouchstart=e=>{e.preventDefault(); stopGame()};
+
+function startGame(){
+  if(gameJalan) return;
+  gameJalan=true; skor=0; ammo=999; musuh=[]; peluru=[]; boom=[]; darahItem=[];
+  ukuran=1; kill=0; nyawa=100; px=c.width/2; py=c.height-180;
+  updateHUD();
+  document.getElementById('sizeFill').style.width = '0%';
+
+  // NERF 1: AWAL CUMA 3 MUSUH
+  for(let i=0; i<3; i++) musuh.push({x:Math.random()*c.width, y:-Math.random()*300, w:30, h:60, s:1.5+Math.random()*2}) // LEBIH LAMBAT
+
+  // NERF 2: SPAWN LEBIH LAMA
+  let spawnSpeed = isMobile? 800 : 400; // DULU 400/180 SEKARANG 800/400
+
+  spawnMusuh = setInterval(()=>{
+    if(gameJalan){
+      // NERF 3: CUMA SPAWN 1, GAK ADA SPAWN 2
+      musuh.push({x:Math.random()*c.width, y:-80, w:30, h:60, s:1.5+Math.random()*2}) // LEBIH LAMBAT
+    }
+  }, spawnSpeed);
+  main();
+}
+
+function stopGame(){
+  gameJalan=false; clearInterval(spawnMusuh);
+  x.clearRect(0,0,c.width,c.height);
+  x.fillStyle='rgba(0,0,0,0.7)'; x.fillRect(0,0,c.width,c.height);
+  x.fillStyle='white'; x.font='40px Arial Black'; x.textAlign='center';
+  x.fillText('GAME DI STOP', c.width/2, c.height/2-20);
+  x.font='24px Arial'; x.fillText('Skor Akhir: '+skor, c.width/2, c.height/2+20);
+  x.font='20px Arial'; x.fillText('Create by Mohady', c.width/2, c.height/2+50);
+}
+
+function tembak(){
+  if(ammo>0 && gameJalan){
+    peluru.push({x:px, y:py-30-20*ukuran});
+    ammo--;
+    suara('tembak');
+    updateHUD();
+  }
+}
+
 function main(){
-  if(!gameJalan) return; requestAnimationFrame(main); x.clearRect(0,0,c.width,c.height); x.fillStyle='#0a1a3a'; x.fillRect(0,0,c.width,c.height); x.fillStyle='#004080'; x.fillRect(0,c.height-80,c.width,80);
-  x.fillStyle='white'; salju.forEach(s=>{x.beginPath(); x.arc(s.x,s.y,s.r,0,6.28); x.fill(); s.y+=s.s; s.x+=s.w; if(s.y>c.height){s.y=0; s.x=Math.random()*c.width;}})
-  if(Math.random() < 0.02){darahItem.push({x: Math.random()*c.width, y: 0, r: 12});}
-  for(let i=darahItem.length-1; i>=0; i--){let d = darahItem[i]; d.y += 2; x.fillStyle = "red"; x.beginPath(); x.arc(d.x, d.y, d.r, 0, Math.PI*2); x.fill(); if(Math.hypot(px-d.x, py-d.y) < 25*ukuran){nyawa = Math.min(100, nyawa + 20); ukuran += 0.2; if(ukuran > 2.5) ukuran = 2.5; py = c.height - 180; darahItem.splice(i,1); suara('isi'); updateHUD();} if(d.y > c.height) darahItem.splice(i,1);}
-  let kecepatan = 10 - ukuran*2; if(kecepatan < 2) kecepatan = 2; if(gerakKiri && px > 30*ukuran) px -= kecepatan; if(gerakKanan && px < c.width - 30*ukuran) px += kecepatan; gambarPlayer(px, py);
-  x.fillStyle='orange'; peluru.forEach((p,i)=>{p.y-=22; x.beginPath(); x.arc(p.x,p.y,6,0,6.28); x.fill();});
+  if(!gameJalan) return;
+  requestAnimationFrame(main);
+
+  x.clearRect(0,0,c.width,c.height);
+  x.fillStyle='#0a1a3a'; x.fillRect(0,0,c.width,c.height);
+  x.fillStyle='#004080'; x.fillRect(0,c.height-80,c.width,80);
+
+  x.fillStyle='white';
+  salju.forEach(s=>{
+    x.beginPath(); x.arc(s.x,s.y,s.r,0,6.28); x.fill();
+    s.y+=s.s; s.x+=s.w;
+    if(s.y>c.height){s.y=0; s.x=Math.random()*c.width;}
+  })
+
+ if(Math.random() < 0.02){
+    darahItem.push({x: Math.random()*c.width, y: 0, r: 12});
+ }
+
+ for(let i=darahItem.length-1; i>=0; i--){
+    let d = darahItem[i];
+    d.y += 2;
+    x.fillStyle = "red";
+    x.beginPath();
+    x.arc(d.x, d.y, d.r, 0, Math.PI*2);
+    x.fill();
+
+    if(Math.hypot(px-d.x, py-d.y) < 25*ukuran){
+        nyawa = Math.min(100, nyawa + 20);
+        ukuran += 0.2;
+        if(ukuran > 2.5) ukuran = 2.5;
+        py = c.height - 180;
+        darahItem.splice(i,1);
+        suara('isi');
+        updateHUD();
+    }
+    if(d.y > c.height) darahItem.splice(i,1);
+ }
+
+  let kecepatan = 10 - ukuran*2;
+  if(kecepatan < 2) kecepatan = 2;
+  if(gerakKiri && px > 30*ukuran) px -= kecepatan;
+  if(gerakKanan && px < c.width - 30*ukuran) px += kecepatan;
+
+  gambarPlayer(px, py);
+
+  x.fillStyle='orange';
+  peluru.forEach((p,i)=>{p.y-=22; x.beginPath(); x.arc(p.x,p.y,6,0,6.28); x.fill();});
+
   musuh.forEach((m,i)=>{m.y+=m.s; gambarMusuh(m.x+m.w/2, m.y+30);});
+
   boom.forEach((b,i)=>{b.x+=b.vx; b.y+=b.vy; b.life--; x.fillStyle=`rgba(255,200,0,${b.life/35})`; x.beginPath(); x.arc(b.x,b.y,14,0,6.28); x.fill()});
-  peluru.forEach((p,pi)=>{musuh.forEach((m,mi)=>{if(p.x>m.x && p.x<m.x+m.w && p.y>m.y && p.y<m.y+m.h){ledakan(m.x+15,m.y+30); peluru.splice(pi,1); musuh.splice(mi,1); skor+=10*ukuran; if(Math.random() < 0.3){darahItem.push({x:m.x+15,y:m.y+30, r:12});} ammo+=3; if(ammo>999) ammo=999; suara('isi'); kill++; cekNaikLevel(); ukuran += 0.1; if(ukuran > 2.5) ukuran = 2.5; updateHUD();}})})
-  let sekarang = Date.now(); if(!window.lastKena) window.lastKena = 0;
-  musuh.forEach((m)=>{if(Math.hypot(px-m.x-m.w/2, py-m.y-30) < 25*ukuran){if(sekarang - window.lastKena > 1000){nyawa -= 5; if(nyawa < 0) nyawa = 0; window.lastKena = sekarang; suara('kena'); updateHUD();}}});
-  musuh = musuh.filter(m=>m.y<c.height+80); peluru = peluru.filter(p=>p.y>0); boom = boom.filter(b=>b.life>0);
+
+  peluru.forEach((p,pi)=>{
+    musuh.forEach((m,mi)=>{
+      if(p.x>m.x && p.x<m.x+m.w && p.y>m.y && p.y<m.y+m.h){
+        ledakan(m.x+15,m.y+30); peluru.splice(pi,1); musuh.splice(mi,1); skor+=10*ukuran;
+        if(Math.random() < 0.3){darahItem.push({x:m.x+15,y:m.y+30, r:12});}
+        ammo+=3; if(ammo>999) ammo=999; suara('isi');
+        kill++; cekNaikLevel(); ukuran += 0.1;
+        if(ukuran > 2.5) ukuran = 2.5;
+        updateHUD();
+      }
+    })
+  })
+
+  // NERF 4: KENA MUSUH ADA COOLDOWN + DAMAGE KECIL + GAK GAME OVER
+  let sekarang = Date.now();
+  if(!window.lastKena) window.lastKena = 0;
+
+  musuh.forEach((m)=>{
+    if(Math.hypot(px-m.x-m.w/2, py-m.y-30) < 25*ukuran){
+      if(sekarang - window.lastKena > 1000){ // 1 detik sekali
+        nyawa -= 5; // DULU -10
+        if(nyawa < 0) nyawa = 0; // GAK MINUS
+        window.lastKena = sekarang;
+        suara('kena');
+        updateHUD();
+      }
+    }
+  });
+
+  musuh = musuh.filter(m=>m.y<c.height+80);
+  peluru = peluru.filter(p=>p.y>0);
+  boom = boom.filter(b=>b.life>0);
 }
 </script>
 </body>
