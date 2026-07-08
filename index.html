@@ -74,17 +74,30 @@ function gambarPlayer(px,py){
   let scale = ukuran;
   let w = 28 * scale;
   let h = 35 * scale;
+  let kakiY = py; // Kaki paten di py
+  
   x.strokeStyle='#FFFF00'; x.lineWidth=5*scale;
   x.fillStyle='#FFFF00';
-  x.fillRect(px-w/2, py-h-3, w, 8*scale);
-  x.beginPath(); x.arc(px, py-h+13, 12*scale, 0, 6.28); x.fill(); x.stroke();
-  x.fillRect(px-w/3, py-h+25, w*0.66, h*0.85);
-  x.beginPath(); x.moveTo(px-w/3, py-h+30); x.lineTo(px-w-5, py-h+45); x.stroke();
-  x.beginPath(); x.moveTo(px+w/3, py-h+30); x.lineTo(px+w+5, py-h+45); x.stroke();
-  x.beginPath(); x.moveTo(px-w/3, py-h+25+h*0.85); x.lineTo(px-w/2, py+35*scale); x.stroke();
-  x.beginPath(); x.moveTo(px+w/3, py-h+25+h*0.85); x.lineTo(px+w/2, py+35*scale); x.stroke();
+  
+  // Topi
+  x.fillRect(px-w/2, kakiY-h-3, w, 8*scale);
+  
+  // Kepala
+  x.beginPath(); x.arc(px, kakiY-h+13, 12*scale, 0, 6.28); x.fill(); x.stroke();
+  
+  // Badan
+  x.fillRect(px-w/3, kakiY-h+25, w*0.66, h*0.85);
+  
+  // Tangan kiri
+  x.beginPath(); x.moveTo(px-w/3, kakiY-h+30); x.lineTo(px-w-5, kakiY-h+45); x.stroke();
+  // Tangan kanan
+  x.beginPath(); x.moveTo(px+w/3, kakiY-h+30); x.lineTo(px+w+5, kakiY-h+45); x.stroke();
+  
+  // Kaki kiri
+  x.beginPath(); x.moveTo(px-w/3, kakiY-h+25+h*0.85); x.lineTo(px-w/2, kakiY); x.stroke();
+  // Kaki kanan
+  x.beginPath(); x.moveTo(px+w/3, kakiY-h+25+h*0.85); x.lineTo(px+w/2, kakiY); x.stroke();
 }
-
 function gambarMusuh(px,py){
   x.strokeStyle='#FF69B4'; x.lineWidth=3;
   x.beginPath(); x.arc(px, py-25, 10, 0, 6.28); x.stroke();
