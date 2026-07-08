@@ -139,8 +139,7 @@ function cekNaikLevel(){
   
   // Update bar + HUD
   document.getElementById('sizeFill').style.width = (kill/targetKill*100) + '%';
-  document.getElementById('hud').innerText = `Level: ${level} | Skor: ${skor} | Peluru: ${ammo}`;
-}
+document.getElementById('hud').innerText = 'Level: ' + level + ' | Skor: ' + skor + ' | Peluru: ' + ammo;
 
 function setGerak(kiri,kanan){ if(gameJalan){gerakKiri=kiri; gerakKanan=kanan} }
 
