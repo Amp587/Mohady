@@ -77,16 +77,24 @@ function suara(tipe){
   o.start(); o.stop(audioCtx.currentTime+0.8);
 }
 
-function gambarPlayer(x,y){
-  let s = ukuran; // ini kuncinya
+function gambarPlayer(px,py){
+  let s = ukuran;
+  if(s < 0.5) s = 0.5; // jaga2 biar gak ilang
+  if(s > 2.5) s = 2.5; // mentok 2.5x
+  
   x.fillStyle='orange';
-  x.fillRect(x-15*s, y-20*s, 30*s, 40*s); // badan ikut gede
-  x.fillRect(x-5*s, y+20*s, 10*s, 20*s);  // kaki ikut gede
-  x.fillRect(x-15*s, y-10*s, 10*s, 10*s); // tangan kiri
-  x.fillRect(x+5*s, y-10*s, 10*s, 10*s);  // tangan kanan
+  x.fillRect(px-15*s, py-20*s, 30*s, 40*s); // badan lama kamu *s
+  
+  x.fillRect(px-5*s, py+20*s, 10*s, 20*s);  // kaki kiri lama *s
+  x.fillRect(px+5*s, py+20*s, 10*s, 20*s);  // kaki kanan lama *s
+  
+  x.fillRect(px-15*s, py-10*s, 10*s, 10*s); // tangan kiri *s
+  x.fillRect(px+5*s, py-10*s, 10*s, 10*s);  // tangan kanan *s
+  
   x.fillStyle='black';
-  x.fillRect(x-5*s, y-15*s, 10*s, 5*s); // mata
+  x.fillRect(px-5*s, py-15*s, 10*s, 5*s); // mata *s
 }
+  
 function gambarMusuh(px,py){
   x.strokeStyle='#FF69B4'; x.lineWidth=3;
   x.beginPath(); x.arc(px, py-25, 10, 0, 6.28); x.stroke();
