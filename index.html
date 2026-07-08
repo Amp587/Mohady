@@ -22,7 +22,7 @@ html,body{height:100%}
 </style>
 </head>
 <body>
-<div id="hud">Skor: 0 | Peluru: 999</div>
+<div id="hud">Level: 1 | Skor: 0 | Peluru: 999</div>
 <div id="credit">by Mohady</div>
 <div id="sizeBar"><div id="sizeFill"></div></div>
 <div id="btnKiri" class="btn">◀️</div>
@@ -34,6 +34,14 @@ html,body{height:100%}
 <script>
 let c = document.getElementById('c');
 let x = c.getContext('2d');
+
+// VARIABEL LEVEL
+let level = 1;
+let targetKill = 10;
+let kill = 0;
+let skor = 0;
+let ukuran = 1;
+let ammo = 999;
 
 function resize(){
   c.width = window.innerWidth;
@@ -116,9 +124,22 @@ function ledakan(px,py){
 }
 
 function cekNaikLevel(){
-  if(kill >= 30 && ukuran < 3){ukuran=3; suara('raksasa');} 
-  else if(kill >= 10 && ukuran < 2){ukuran=2; suara('raksasa');}
-  document.getElementById('sizeFill').style.width = (kill/30*100) + '%';
+  // Cek naik level
+  if(kill >= targetKill){
+    level++;
+    kill = 0;
+    targetKill = level * 20;
+    suara('raksasa');
+    alert('SELAMAT! NAIK KE LEVEL ' + level);
+  }
+
+  // Atur ukuran
+  if(level >= 2 && ukuran < 2){ukuran = 2;}
+  if(level >= 3 && ukuran < 3){ukuran = 3;}
+  
+  // Update bar + HUD
+  document.getElementById('sizeFill').style.width = (kill/targetKill*100) + '%';
+  document.getElementById('hud').innerText = `Level: ${level} | Skor: ${skor} | Peluru: ${ammo}`;
 }
 
 function setGerak(kiri,kanan){ if(gameJalan){gerakKiri=kiri; gerakKanan=kanan} }
