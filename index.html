@@ -77,33 +77,15 @@ function suara(tipe){
   o.start(); o.stop(audioCtx.currentTime+0.8);
 }
 
-function gambarPlayer(px,py){
-  let scale = ukuran;
-  let w = 28 * scale;
-  let h = 35 * scale;
-  let kakiY = py; // Kaki paten di py
-   py = kakiY-h/2;// geser titik tengah ke atas
-  x.strokeStyle='#FFFF00'; x.lineWidth=5*scale;
-  x.fillStyle='#FFFF00';
-  
-  // Topi
-  x.fillRect(px-w/2, kakiY-h-3, w, 8*scale);
-  
-  // Kepala
-  x.beginPath(); x.arc(px, kakiY-h+13, 12*scale, 0, 6.28); x.fill(); x.stroke();
-  
-  // Badan
-  x.fillRect(px-w/3, kakiY-h+25, w*0.66, h*0.85);
-  
-  // Tangan kiri
-  x.beginPath(); x.moveTo(px-w/3, kakiY-h+30); x.lineTo(px-w-5, kakiY-h+45); x.stroke();
-  // Tangan kanan
-  x.beginPath(); x.moveTo(px+w/3, kakiY-h+30); x.lineTo(px+w+5, kakiY-h+45); x.stroke();
-  
-  // Kaki kiri
-  x.beginPath(); x.moveTo(px-w/3, kakiY-h+25+h*0.85); x.lineTo(px-w/2, kakiY); x.stroke();
-  // Kaki kanan
-  x.beginPath(); x.moveTo(px+w/3, kakiY-h+25+h*0.85); x.lineTo(px+w/2, kakiY); x.stroke();
+function gambarPlayer(x,y){
+  let s = ukuran; // ini kuncinya
+  x.fillStyle='orange';
+  x.fillRect(x-15*s, y-20*s, 30*s, 40*s); // badan ikut gede
+  x.fillRect(x-5*s, y+20*s, 10*s, 20*s);  // kaki ikut gede
+  x.fillRect(x-15*s, y-10*s, 10*s, 10*s); // tangan kiri
+  x.fillRect(x+5*s, y-10*s, 10*s, 10*s);  // tangan kanan
+  x.fillStyle='black';
+  x.fillRect(x-5*s, y-15*s, 10*s, 5*s); // mata
 }
 function gambarMusuh(px,py){
   x.strokeStyle='#FF69B4'; x.lineWidth=3;
