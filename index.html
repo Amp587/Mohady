@@ -221,7 +221,8 @@ for(let i=darahItem.length-1; i>=0; i--){
     if(Math.hypot(px-d.x, py-d.y) < 25){
         hp = Math.min(100, hp + 20); // <- INI "hp + 20"
         ukuran += 0.2;
-        py = c.height - 180 * ukuran; // biar kaki napak
+      if(ukuran > 2.5) ukuran = 2.5;
+        py = c.height - 180 ; // biar kaki napak
         darahItem.splice(i,1);
     }
     if(d.y > c.height) darahItem.splice(i,1);
@@ -243,8 +244,10 @@ for(let i=darahItem.length-1; i>=0; i--){
     musuh.forEach((m,mi)=>{
       if(p.x>m.x && p.x<m.x+m.w && p.y>m.y && p.y<m.y+m.h){
         ledakan(m.x+15,m.y+30); peluru.splice(pi,1); musuh.splice(mi,1); skor+=10*ukuran;
+        if(Math.random() < 0.3){darahItem.push({x:m.x+15,y:m.y+30, r:12});}
         ammo+=3; if(ammo>999) ammo=999; suara('isi');
-        kill++; cekNaikLevel();
+        kill++; cekNaikLevel(); ukuran += 0.1;
+        if(ukuran > 2.5) ukuran = 2.5;
       }
     })
   })
