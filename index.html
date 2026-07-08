@@ -22,7 +22,7 @@ html,body{height:100%}
 </style>
 </head>
 <body>
-<div id="hud"> Skor: 0 | Peluru: 999</div>
+<div id="hud"> Skor: 0 | Peluru: 999 | Darah: 100</div>
 <div id="credit">by Mohady</div>
 <div id="sizeBar"><div id="sizeFill"></div></div>
 <div id="btnKiri" class="btn">◀️</div>
@@ -35,11 +35,7 @@ html,body{height:100%}
 let c = document.getElementById('c');
 let x = c.getContext('2d');
 
-// VARIABEL Game
-
-
 let ukuran = 1;
-
 
 function resize(){
   c.width = window.innerWidth;
@@ -48,15 +44,14 @@ function resize(){
 resize();
 window.addEventListener('resize', resize);
 
-// CEK APAKAH HP
 let isMobile = window.innerWidth < 768;
 
 let px = c.width/2;
 let py = c.height - 180;
- 
+
 let kill = 0;
-let musuh = [], peluru = [], boom = [], salju = [], skor = 0, nyawa = 100, darahItem = []; ammo = 999;
- 
+let musuh = [], peluru = [], boom = [], salju = [], skor = 0, nyawa = 100, darahItem = [], ammo = 999; // FIX 1: koma
+
 let gerakKiri = false, gerakKanan = false, gameJalan = false;
 let spawnMusuh;
 
@@ -64,8 +59,6 @@ for(let i=0; i<100; i++){
   salju.push({x:Math.random()*c.width, y:Math.random()*c.height, r:Math.random()*3+1, s:Math.random()*2+1, w:Math.random()*0.5-0.25})
 }
 
-  
- 
 let audioCtx;
 function suara(tipe){
   if(!gameJalan) return;
@@ -79,6 +72,7 @@ function suara(tipe){
   o.start(); o.stop(audioCtx.currentTime+0.8);
 }
 
+// PLAYER TETEP KUNING KOTAK KAYA PUNYA KAMU
 function gambarPlayer(px,py){
   var s = ukuran;
   x.fillStyle = 'yellow';
@@ -101,7 +95,7 @@ function gambarPlayer(px,py){
   x.fillRect(px-12*s, py+9*s, 9*s, 18*s);
   x.fillRect(px+3*s, py+9*s, 9*s, 18*s);
 }
-  
+
 function gambarMusuh(px,py){
   x.strokeStyle='#FF69B4'; x.lineWidth=3;
   x.beginPath(); x.arc(px, py-25, 10, 0, 6.28); x.stroke();
@@ -120,11 +114,13 @@ function ledakan(px,py){
 }
 
 function updateHUD(){
-  // Update bar + HUD versi lama
   document.getElementById('sizeFill').style.width = (ukuran/3*100) + '%';
-  document.getElementById('hud').innerText = 'Skor: ' + skor + ' | Peluru: ' + ammo;
+  document.getElementById('hud').innerText = 'Skor: ' + skor + ' | Peluru: ' + ammo + ' | Darah: ' + nyawa; // TAMBAH DARAH
 }
-  
+
+function cekNaikLevel(){ // FIX 2: TAMBAH INI BIAR GAK ERROR
+}
+
 function setGerak(kiri,kanan){ if(gameJalan){gerakKiri=kiri; gerakKanan=kanan} }
 
 document.getElementById('btnKiri').addEventListener('touchstart',e=>{e.preventDefault(); setGerak(true,false)});
@@ -147,18 +143,17 @@ document.getElementById('btnStop').ontouchstart=e=>{e.preventDefault(); stopGame
 
 function startGame(){
   if(gameJalan) return;
-  gameJalan=true; skor=0; ammo=999; musuh=[]; peluru=[]; boom=[];
-  ukuran=1; kill=0; px=c.width/2; py=c.height-180;
+  gameJalan=true; skor=0; ammo=999; musuh=[]; peluru=[]; boom=[]; darahItem=[];
+  ukuran=1; kill=0; nyawa=100; px=c.width/2; py=c.height-180; // RESET DARAH
+  updateHUD();
   document.getElementById('sizeFill').style.width = '0%';
   for(let i=0; i<5; i++) musuh.push({x:Math.random()*c.width, y:-Math.random()*300, w:30, h:60, s:3+Math.random()*4})
-  
-  // KECEPATAN SPAWN: HP LEBIH LAMA
-  let spawnSpeed = isMobile ? 400 : 180; // HP 400ms, PC 180ms
-  
+
+  let spawnSpeed = isMobile? 400 : 180;
+
   spawnMusuh = setInterval(()=>{
     if(gameJalan){
       musuh.push({x:Math.random()*c.width, y:-80, w:30, h:60, s:3+Math.random()*4})
-      // DI HP CUMA SPAWN 1, DI PC BISA 2
       if(!isMobile && Math.random()<0.5) musuh.push({x:Math.random()*c.width, y:-80, w:30, h:60, s:3+Math.random()*4})
     }
   }, spawnSpeed);
@@ -180,6 +175,7 @@ function tembak(){
     peluru.push({x:px, y:py-30-20*ukuran});
     ammo--;
     suara('tembak');
+    updateHUD();
   }
 }
 
@@ -199,36 +195,40 @@ function main(){
   })
 
  // SPAWN ITEM DARAH
-if(Math.random() < 0.02){ 
+ if(Math.random() < 0.02){
     darahItem.push({x: Math.random()*c.width, y: 0, r: 12});
-}
+ }
 
-// GAMBAR + CEK AMBIL DARAH
-for(let i=darahItem.length-1; i>=0; i--){
+ // GAMBAR + CEK AMBIL DARAH
+ for(let i=darahItem.length-1; i>=0; i--){
     let d = darahItem[i];
     d.y += 2; // jatuh ke bawah
-    
+
     // gambar hati merah
     x.fillStyle = "red";
     x.beginPath();
     x.arc(d.x, d.y, d.r, 0, Math.PI*2);
     x.fill();
-    
+
     // KALAU KENA PLAYER
-    if(Math.hypot(px-d.x, py-d.y) < 25){
-        hp = Math.min(100, hp + 20); // <- INI "hp + 20"
+    if(Math.hypot(px-d.x, py-d.y) < 25*ukuran){
+        nyawa = Math.min(100, nyawa + 20); // FIX 3: hp ganti nyawa
         ukuran += 0.2;
-      if(ukuran > 2.5) ukuran = 2.5;
-        py = c.height - 180 ; // biar kaki napak
+        if(ukuran > 2.5) ukuran = 2.5;
+        py = c.height - 180; // biar kaki napak
         darahItem.splice(i,1);
+        suara('isi');
+        updateHUD();
     }
     if(d.y > c.height) darahItem.splice(i,1);
-} 
+ }
+
   let kecepatan = 10 - ukuran*2;
+  if(kecepatan < 2) kecepatan = 2;
   if(gerakKiri && px > 30*ukuran) px -= kecepatan;
   if(gerakKanan && px < c.width - 30*ukuran) px += kecepatan;
 
-  gambarPlayer(px, py);
+  gambarPlayer(px, py); // PLAYER TETEP INI
 
   x.fillStyle='orange';
   peluru.forEach((p,i)=>{p.y-=22; x.beginPath(); x.arc(p.x,p.y,6,0,6.28); x.fill();});
@@ -245,18 +245,23 @@ for(let i=darahItem.length-1; i>=0; i--){
         ammo+=3; if(ammo>999) ammo=999; suara('isi');
         kill++; cekNaikLevel(); ukuran += 0.1;
         if(ukuran > 2.5) ukuran = 2.5;
+        updateHUD();
       }
     })
   })
 
+  // CEK KENA MUSUH - DARAH BERKURANG
+  musuh.forEach((m)=>{
+    if(Math.hypot(px-m.x-m.w/2, py-m.y-30) < 25*ukuran){
+      nyawa -= 10;
+      if(nyawa <= 0) stopGame();
+      updateHUD();
+    }
+  });
+
   musuh = musuh.filter(m=>m.y<c.height+80);
   peluru = peluru.filter(p=>p.y>0);
   boom = boom.filter(b=>b.life>0);
-
-  let status = '';
-  if(ukuran==2) status = ' ';
-  if(ukuran==3) status = ' [RAKSASA]';
-  document.getElementById('hud').innerText = `Skor: ${skor} | Peluru: ${ammo}${status}`;
 }
 </script>
 </body>
