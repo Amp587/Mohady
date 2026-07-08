@@ -80,33 +80,26 @@ function suara(tipe){
 }
 
 function gambarPlayer(px,py){
-  var scale = ukuran; // biar bisa gede
-  var w = 20*scale;
-  var h = 40*scale;
-  var kakiY = py;
-
-  x.fillStyle = 'yellow'; // badan kuning
-  x.strokeStyle = 'black'; // INI PENTING BIAR KAKI KELIATAN
-  x.lineWidth = 3*scale;   // INI JUGA BIAR GAK TIPIS BANGET
-
-  // Topi
-  x.fillRect(px-w/2, kakiY-h-3, w, 8*scale);
+  var s = ukuran;
+  x.fillStyle = 'yellow';
+  x.strokeStyle = 'black';
+  x.lineWidth = 2*s;
 
   // Kepala
-  x.beginPath(); x.arc(px, kakiY-h+13, 12*scale, 0, 6.28); x.fill(); x.stroke();
-
+  x.fillRect(px-12*s, py-40*s, 24*s, 24*s);
+  // Mata
+  x.fillStyle = 'black';
+  x.fillRect(px-7*s, py-33*s, 4*s, 4*s);
+  x.fillRect(px+3*s, py-33*s, 4*s, 4*s);
   // Badan
-  x.fillRect(px-w/3, kakiY-h+25, w*0.66, h*0.85);
-
-  // Tangan kiri
-  x.beginPath(); x.moveTo(px-w/3, kakiY-h+30); x.lineTo(px-w-5, kakiY-h+45); x.stroke();
-  // Tangan kanan
-  x.beginPath(); x.moveTo(px+w/3, kakiY-h+30); x.lineTo(px+w+5, kakiY-h+45); x.stroke();
-
-  // Kaki kiri
-  x.beginPath(); x.moveTo(px-w/3, kakiY-h+25+h*0.85); x.lineTo(px-w/2, kakiY); x.stroke();
-  // Kaki kanan
-  x.beginPath(); x.moveTo(px+w/3, kakiY-h+25+h*0.85); x.lineTo(px+w/2, kakiY); x.stroke();
+  x.fillStyle = 'yellow';
+  x.fillRect(px-15*s, py-16*s, 30*s, 25*s);
+  // Tangan
+  x.fillRect(px-22*s, py-10*s, 7*s, 15*s);
+  x.fillRect(px+15*s, py-10*s, 7*s, 15*s);
+  // Kaki
+  x.fillRect(px-12*s, py+9*s, 9*s, 18*s);
+  x.fillRect(px+3*s, py+9*s, 9*s, 18*s);
 }
   
 function gambarMusuh(px,py){
