@@ -79,20 +79,41 @@ function suara(tipe){
 
 function gambarPlayer(px,py){
   let s = ukuran;
-  if(s < 0.5) s = 0.5; // jaga2 biar gak ilang
-  if(s > 2.5) s = 2.5; // mentok 2.5x
+  if(s < 0.5) s = 0.5;
+  if(s > 2.5) s = 2.5;
   
-  x.fillStyle='orange';
-  x.fillRect(px-15*s, py-20*s, 30*s, 40*s); // badan lama kamu *s
-  
-  x.fillRect(px-5*s, py+20*s, 10*s, 20*s);  // kaki kiri lama *s
-  x.fillRect(px+5*s, py+20*s, 10*s, 20*s);  // kaki kanan lama *s
-  
-  x.fillRect(px-15*s, py-10*s, 10*s, 10*s); // tangan kiri *s
-  x.fillRect(px+5*s, py-10*s, 10*s, 10*s);  // tangan kanan *s
-  
-  x.fillStyle='black';
-  x.fillRect(px-5*s, py-15*s, 10*s, 5*s); // mata *s
+  x.strokeStyle='cyan'; // warna player kamu
+  x.lineWidth = 4*s;
+  x.lineCap = 'round';
+
+  // KEPALA
+  x.beginPath();
+  x.arc(px, py-25*s, 8*s, 0, 6.28);
+  x.stroke();
+
+  // BADAN
+  x.beginPath();
+  x.moveTo(px, py-17*s);
+  x.lineTo(px, py+5*s);
+  x.stroke();
+
+  // TANGAN
+  x.beginPath();
+  x.moveTo(px, py-10*s);
+  x.lineTo(px-12*s, py-2*s);
+  x.moveTo(px, py-10*s);
+  x.lineTo(px+12*s, py-2*s);
+  x.stroke();
+
+  // KAKI
+  x.beginPath();
+  x.moveTo(px, py+5*s);
+  x.lineTo(px-10*s, py+20*s);
+  x.moveTo(px, py+5*s);
+  x.lineTo(px+10*s, py+20*s);
+  x.stroke();
+
+  x.lineWidth = 1; // balikin lagi
 }
   
 function gambarMusuh(px,py){
