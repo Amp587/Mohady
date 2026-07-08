@@ -212,10 +212,10 @@ for(let i=darahItem.length-1; i>=0; i--){
     d.y += 2; // jatuh ke bawah
     
     // gambar hati merah
-    ctx.fillStyle = "red";
-    ctx.beginPath();
-    ctx.arc(d.x, d.y, d.r, 0, Math.PI*2);
-    ctx.fill();
+    x.fillStyle = "red";
+    x.beginPath();
+    x.arc(d.x, d.y, d.r, 0, Math.PI*2);
+    x.fill();
     
     // KALAU KENA PLAYER
     if(Math.hypot(px-d.x, py-d.y) < 25){
