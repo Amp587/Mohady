@@ -64,6 +64,8 @@ for(let i=0; i<100; i++){
   salju.push({x:Math.random()*c.width, y:Math.random()*c.height, r:Math.random()*3+1, s:Math.random()*2+1, w:Math.random()*0.5-0.25})
 }
 
+  let ukuran = 1;
+  let kill = 0;
 let audioCtx;
 function suara(tipe){
   if(!gameJalan) return;
@@ -80,40 +82,33 @@ function suara(tipe){
 function gambarPlayer(px,py){
   let s = ukuran;
   if(s < 0.5) s = 0.5;
-  if(s > 2.5) s = 2.5;
+  if(s > 3) s = 3;
   
-  x.strokeStyle='cyan'; // warna player kamu
-  x.lineWidth = 4*s;
-  x.lineCap = 'round';
-
-  // KEPALA
-  x.beginPath();
-  x.arc(px, py-25*s, 8*s, 0, 6.28);
-  x.stroke();
-
-  // BADAN
-  x.beginPath();
-  x.moveTo(px, py-17*s);
-  x.lineTo(px, py+5*s);
-  x.stroke();
-
+  x.fillStyle='#00ccff'; // WARNA ROBOT BIRU
+  let kakiY = py;
+  let badanY = kakiY - 30*s;
+  let kepalaY = badanY - 12*s;
+  
+  // BADAN KOTAK
+  x.fillRect(px-12*s, badanY, 24*s, 30*s);
+  
+  // KEPALA KOTAK + ANTENA
+  x.fillRect(px-10*s, kepalaY, 20*s, 12*s);
+  x.fillRect(px-2*s, kepalaY-5*s, 4*s, 5*s);
+  
+  // MATA PUTIH
+  x.fillStyle='white';
+  x.fillRect(px-7*s, kepalaY+3*s, 5*s, 5*s);
+  x.fillRect(px+2*s, kepalaY+3*s, 5*s, 5*s);
+  
   // TANGAN
-  x.beginPath();
-  x.moveTo(px, py-10*s);
-  x.lineTo(px-12*s, py-2*s);
-  x.moveTo(px, py-10*s);
-  x.lineTo(px+12*s, py-2*s);
-  x.stroke();
-
-  // KAKI
-  x.beginPath();
-  x.moveTo(px, py+5*s);
-  x.lineTo(px-10*s, py+20*s);
-  x.moveTo(px, py+5*s);
-  x.lineTo(px+10*s, py+20*s);
-  x.stroke();
-
-  x.lineWidth = 1; // balikin lagi
+  x.fillStyle='#00ccff';
+  x.fillRect(px-18*s, badanY+5*s, 6*s, 15*s);
+  x.fillRect(px+12*s, badanY+5*s, 6*s, 15*s);
+  
+  // KAKI - INI PATOKANNYA KAKI Y
+  x.fillRect(px-10*s, kakiY, 7*s, 15*s);
+  x.fillRect(px+3*s, kakiY, 7*s, 15*s);
 }
   
 function gambarMusuh(px,py){
