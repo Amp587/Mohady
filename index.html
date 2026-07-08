@@ -35,10 +35,8 @@ html,body{height:100%}
 let c = document.getElementById('c');
 let x = c.getContext('2d');
 
-// VARIABEL LEVEL
-let level = 1;
-let targetKill = 10;
-let kill = 0;
+// VARIABEL Game
+
 let skor = 0;
 let ukuran = 1;
 let ammo = 999;
@@ -123,24 +121,12 @@ function ledakan(px,py){
   for(let i=0; i<25; i++) boom.push({x:px, y:py, vx:(Math.random()-0.5)*10, vy:(Math.random()-0.5)*10, life:35})
 }
 
-function cekNaikLevel(){
-  // Cek naik level
-  if(kill >= targetKill){
-    level++;
-    kill = 0;
-    targetKill = level * 20;
-    suara('raksasa');
-    alert('SELAMAT! NAIK KE LEVEL ' + level);
-  }
-
-  // Atur ukuran
-  if(level >= 2 && ukuran < 2){ukuran = 2;}
-  if(level >= 3 && ukuran < 3){ukuran = 3;}
+function updateHUD(){
+  // Update bar + HUD versi lama
+  document.getElementById('sizeFill').style.width = (ukuran/3*100) + '%';
+  document.getElementById('hud').innerText = 'Skor: ' + skor + ' | Peluru: ' + ammo;
+}
   
-  // Update bar + HUD
-  document.getElementById('sizeFill').style.width = (kill/targetKill*100) + '%';
-document.getElementById('hud').innerText = 'Level: ' + level + ' | Skor: ' + skor + ' | Peluru: ' + ammo;
-
 function setGerak(kiri,kanan){ if(gameJalan){gerakKiri=kiri; gerakKanan=kanan} }
 
 document.getElementById('btnKiri').addEventListener('touchstart',e=>{e.preventDefault(); setGerak(true,false)});
