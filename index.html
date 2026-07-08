@@ -80,35 +80,32 @@ function suara(tipe){
 }
 
 function gambarPlayer(px,py){
-  let s = ukuran;
-  if(s < 0.5) s = 0.5;
-  if(s > 3) s = 3;
+  let scale = ukuran;
+  let w = 28 * scale;
+  let h = 35 * scale;
+  let kakiY = py; // Kaki paten di py
+   py = kakiY-h/2;// geser titik tengah ke atas
+  x.strokeStyle='#FFFF00'; x.lineWidth=5*scale;
+  x.fillStyle='#FFFF00';
   
-  x.fillStyle='#00ccff'; // WARNA ROBOT BIRU
-  let kakiY = py;
-  let badanY = kakiY - 30*s;
-  let kepalaY = badanY - 12*s;
+  // Topi
+  x.fillRect(px-w/2, kakiY-h-3, w, 8*scale);
   
-  // BADAN KOTAK
-  x.fillRect(px-12*s, badanY, 24*s, 30*s);
+  // Kepala
+  x.beginPath(); x.arc(px, kakiY-h+13, 12*scale, 0, 6.28); x.fill(); x.stroke();
   
-  // KEPALA KOTAK + ANTENA
-  x.fillRect(px-10*s, kepalaY, 20*s, 12*s);
-  x.fillRect(px-2*s, kepalaY-5*s, 4*s, 5*s);
+  // Badan
+  x.fillRect(px-w/3, kakiY-h+25, w*0.66, h*0.85);
   
-  // MATA PUTIH
-  x.fillStyle='white';
-  x.fillRect(px-7*s, kepalaY+3*s, 5*s, 5*s);
-  x.fillRect(px+2*s, kepalaY+3*s, 5*s, 5*s);
+  // Tangan kiri
+  x.beginPath(); x.moveTo(px-w/3, kakiY-h+30); x.lineTo(px-w-5, kakiY-h+45); x.stroke();
+  // Tangan kanan
+  x.beginPath(); x.moveTo(px+w/3, kakiY-h+30); x.lineTo(px+w+5, kakiY-h+45); x.stroke();
   
-  // TANGAN
-  x.fillStyle='#00ccff';
-  x.fillRect(px-18*s, badanY+5*s, 6*s, 15*s);
-  x.fillRect(px+12*s, badanY+5*s, 6*s, 15*s);
-  
-  // KAKI - INI PATOKANNYA KAKI Y
-  x.fillRect(px-10*s, kakiY, 7*s, 15*s);
-  x.fillRect(px+3*s, kakiY, 7*s, 15*s);
+  // Kaki kiri
+  x.beginPath(); x.moveTo(px-w/3, kakiY-h+25+h*0.85); x.lineTo(px-w/2, kakiY); x.stroke();
+  // Kaki kanan
+  x.beginPath(); x.moveTo(px+w/3, kakiY-h+25+h*0.85); x.lineTo(px+w/2, kakiY); x.stroke();
 }
   
 function gambarMusuh(px,py){
