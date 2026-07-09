@@ -1,176 +1,213 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<title>GAME RAKSASA FIX</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Shooter V2 - Mohady</title>
 <style>
-body{margin:0;background:linear-gradient(#1e3c72,#2a5298);overflow:hidden;font-family:'Arial Black';user-select:none;height:100vh}
-html,body{height:100%}
-#c{display:block;width:100%;height:100vh}
-#hud{position:absolute;top:10px;left:50%;transform:translateX(-50%);color:yellow;font-size:24px;text-shadow:2px 2px black;z-index:5;text-align:center;white-space:nowrap}
-#credit{position:absolute;top:45px;left:50%;transform:translateX(-50%);color:#00ffff;font-size:22px;font-weight:bold;text-shadow:3px 3px black;z-index:5;font-style:italic;text-align:center}
-#sizeBar{position:absolute;top:80px;left:50%;transform:translateX(-50%);width:250px;height:18px;background:#333;border:3px solid white;border-radius:10px;z-index:5}
-#sizeFill{height:100%;background:linear-gradient(yellow,orange);border-radius:8px;width:0%}
-#healthBar{position:absolute;top:105px;left:50%;transform:translateX(-50%);width:250px;height:18px;background:#333;border:3px solid red;border-radius:10px;z-index:5}
-#healthFill{height:100%;background:linear-gradient(lime,green);border-radius:8px;width:100%}
-.btn{position:absolute;bottom:30px;width:110px;height:110px;background:rgba(0,0,0,0.9);color:white;border:4px solid white;border-radius:25px;font-size:38px;font-weight:bold;display:flex;align-items:center;justify-content:center;z-index:10;touch-action:none}
-#btnKiri{left:25px;}#btnKanan{left:145px;}#btnTembak{right:25px;width:140px;height:140px;background:rgba(255,0,0,1);font-size:22px}
-.btnKecil{position:absolute;top:20px;width:110px;height:65px;background:rgba(0,150,0,0.9);color:white;border:3px solid white;border-radius:15px;font-size:20px;font-weight:bold;display:flex;align-items:center;justify-content:center;z-index:10;touch-action:none}
-#btnStart{right:140px;}#btnStop{right:20px;width:110px;height:65px;background:rgba(255,0,0,0.9);font-size:20px}
-.btn:active,.btnKecil:active{background:rgba(255,255,0,1);transform:scale(0.9)}
+    body { margin: 0; background: #000; overflow: hidden; color: white; font-family: 'Arial'; }
+    canvas { display: block; background: linear-gradient(to bottom, #000, #110022); }
+    #ui { position: absolute; top: 10px; left: 10px; font-size: 18px; text-shadow: 0 0 5px #0ff; }
+    #credit { position: absolute; bottom: 10px; width: 100%; text-align: center; font-size: 14px; color: #0ff; }
+    #start { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+    #start button { padding: 15px 30px; font-size: 20px; background: #0ff; border: none; color: #000; cursor: pointer; border-radius: 10px; }
 </style>
 </head>
 <body>
-<div id="hud"> Level: 1 | Skor: 0 | Darah: 100</div>
-<div id="credit">by Mohady</div>
-<div id="sizeBar"><div id="sizeFill"></div></div>
-<div id="healthBar"><div id="healthFill"></div></div>
-<div id="btnKiri" class="btn">◀️</div>
-<div id="btnKanan" class="btn">▶️</div>
-<div id="btnTembak" class="btn">TEMBAK</div>
-<div id="btnStart" class="btnKecil">START</div>
-<div id="btnStop" class="btnKecil">STOP</div>
-<canvas id="c"></canvas>
+<div id="ui">Skor: <span id="skor">0</span> | Level: <span id="level">1</span> | Nyawa: <span id="nyawa">3</span></div>
+<div id="credit">by Mohady V2</div>
+<div id="start">
+    <h1>🚀 SPACE SHOOTER V2 🚀</h1>
+    <p>Tombol: A/D atau ← → untuk gerak | Spasi untuk nembak</p>
+    <button onclick="mulai()">MULAI GAME</button>
+</div>
+<canvas id="game"></canvas>
+
 <script>
-let c = document.getElementById('c');let x = c.getContext('2d');let ukuran = 1;
-let px, py;
-function resize(){c.width = window.innerWidth; c.height = window.innerHeight; px = c.width/2; py = c.height - 180;}
-resize(); window.addEventListener('resize', resize);
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-let kill = 0; let musuh = [], peluru = [], peluruMusuh = [], boom = [], salju = [], skor = 0, nyawa = 100, darahItem = [], ammo = 999;
-let level = 1;
-let gerakKiri = false, gerakKanan = false, gameJalan = false; let spawnMusuh;
-for(let i=0; i<100; i++){salju.push({x:Math.random()*c.width, y:Math.random()*c.height, r:Math.random()*3+1, s:Math.random()*2+1, w:Math.random()*0.5-0.25})}
-let audioCtx;
-function suara(tipe){if(!gameJalan) return; if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); let o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); if(tipe=='tembak'){o.type='square';o.frequency.value=1000;g.gain.setValueAtTime(0.3,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.05)} if(tipe=='kena'){o.type='sawtooth';o.frequency.value=150;g.gain.setValueAtTime(0.5,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.2)} if(tipe=='isi'){o.type='sine';o.frequency.value=600;g.gain.setValueAtTime(0.4,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.2)} o.start(); o.stop(audioCtx.currentTime+0.8);}
+let player, peluru, musuh, peluruMusuh, partikel, bintang;
+let skor = 0, level = 1, nyawa = 3, gameJalan = false;
+let tombol = {};
 
-function gambarPlayer(px,py){
-    var s = ukuran;
-    x.fillStyle = 'yellow'; x.strokeStyle = 'black'; x.lineWidth = 2*s;
-    x.fillRect(px-12*s, py-40*s, 24*s, 24*s);
-    x.fillStyle = 'black'; x.fillRect(px-7*s, py-33*s, 4*s, 4*s); x.fillRect(px+3*s, py-33*s, 4*s, 4*s);
-    x.fillStyle = 'red'; x.fillRect(px-15*s, py-16*s, 30*s, 25*s);
-    x.fillStyle = 'yellow'; x.fillRect(px-22*s, py-10*s, 7*s, 15*s); x.fillRect(px+15*s, py-10*s, 7*s, 15*s);
-    x.strokeStyle = 'white'; x.lineWidth = 4*s;
-    x.beginPath(); x.moveTo(px-8*s, py+9*s); x.lineTo(px-8*s, py+27*s); x.stroke();
-    x.beginPath(); x.moveTo(px+8*s, py+9*s); x.lineTo(px+8*s, py+27*s); x.stroke();
+// 1. PLAYER
+function buatPlayer(){
+    player = { x: canvas.width/2, y: canvas.height-60, w: 40, h: 40, speed: 7, cd: 0 };
 }
 
-function gambarMusuh(m){
-    var s = m.jenis == 'raksasa'? 1.8 + level*0.1 : 1;
-    let warna = {biasa:'white', cepat:'#9400D3', tank:'#00FF00', penembak:'#00BFFF', bomber:'#FF0000', raksasa:'#8B0000'};
-
-    if(m.jenis == 'raksasa'){
-        x.fillStyle = warna.raksasa; x.fillRect(m.x-20*s, m.y-10*s, 40*s, 50*s);
-        x.fillStyle = '#FF6347'; x.beginPath(); x.arc(m.x, m.y-25*s, 18*s, 0, 6.28); x.fill();
-        x.fillStyle = 'black'; x.fillRect(m.x-10*s, m.y-30*s, 5*s, 5*s); x.fillRect(m.x+5*s, m.y-30*s, 5*s, 5*s);
-        x.strokeStyle='yellow'; x.lineWidth=5*s; x.beginPath(); x.moveTo(m.x-20*s, m.y); x.lineTo(m.x-35*s, m.y+20*s); x.stroke();
-        x.beginPath(); x.moveTo(m.x+20*s, m.y); x.lineTo(m.x+35*s, m.y+20*s); x.stroke();
-        x.strokeStyle='white'; x.lineWidth=3*s;
-        x.beginPath(); x.moveTo(m.x-10*s, m.y+40*s); x.lineTo(m.x-10*s, m.y+70*s); x.stroke();
-        x.beginPath(); x.moveTo(m.x+10*s, m.y+40*s); x.lineTo(m.x+10*s, m.y+70*s); x.stroke();
-        let barWidth = 40*s; let barHeight = 6*s; let hpPersen = m.hp / m.maxHp;
-        x.fillStyle = 'black'; x.fillRect(m.x - barWidth/2, m.y-50*s, barWidth, barHeight);
-        x.fillStyle = hpPersen > 0.5? 'lime' : hpPersen > 0.2? 'orange' : 'red';
-        x.fillRect(m.x - barWidth/2, m.y-50*s, barWidth * hpPersen, barHeight);
-        x.strokeStyle = 'white'; x.lineWidth = 1*s; x.strokeRect(m.x - barWidth/2, m.y-50*s, barWidth, barHeight);
-    } else {
-        x.fillStyle = warna[m.jenis];
-        x.beginPath(); x.arc(m.x, m.y-25, 10, 0, 6.28); x.fill();
-        x.fillRect(m.x-8, m.y-15, 16, 20);
-        x.strokeStyle='yellow'; x.lineWidth=3;
-        x.beginPath(); x.moveTo(m.x-8, m.y-5); x.lineTo(m.x-16, m.y+2); x.stroke();
-        x.beginPath(); x.moveTo(m.x+8, m.y-5); x.lineTo(m.x+16, m.y+2); x.stroke();
-        x.strokeStyle='white'; x.lineWidth=2;
-        x.beginPath(); x.moveTo(m.x-4, m.y+5); x.lineTo(m.x-4, m.y+18); x.stroke();
-        x.beginPath(); x.moveTo(m.x+4, m.y+5); x.lineTo(m.x+4, m.y+18); x.stroke();
-    }
-}
-function ledakan(px,py,besar){suara('kena'); let jumlah = besar? 40 : 20; for(let i=0; i<jumlah; i++) boom.push({x:px, y:py, vx:(Math.random()-0.5)*10, vy:(Math.random()-0.5)*10, life:besar?50:35})}
-function updateHUD(){document.getElementById('sizeFill').style.width = (ukuran/2.5*100) + '%'; document.getElementById('healthFill').style.width = (nyawa/120*100) + '%'; let tampilDarah = nyawa > 100? 100 : nyawa; document.getElementById('hud').innerText = 'Level: ' + level + ' | Skor: ' + skor + ' | Darah: ' + tampilDarah;}
-
-function cekNaikLevel(){
-    let targetScore = level * 500 - 400;
-    if(level == 1) targetScore = 100;
-    if(skor >= targetScore){
-        level++;
-        let pesan = "LEVEL UP! SEKARANG LEVEL " + level;
-        if(level==3) pesan += "\nMUSUH BARU: CEPAT UNGU!";
-        if(level==5) pesan += "\nMUSUH BARU: TANK HIJAU DARAH TEBEL!";
-        if(level==6) pesan += "\nMUSUH BARU: PENEMBAK BIRU!";
-        if(level==7) pesan += "\nMUSUH BARU: BOMBER MERAH MELEDAK!";
-        alert(pesan);
+// 2. BINTANG BACKGROUND
+function buatBintang(){
+    bintang = [];
+    for(let i=0; i<150; i++){
+        bintang.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*2, s: Math.random()*0.5+0.2});
     }
 }
 
-function setGerak(kiri,kanan){ if(gameJalan){gerakKiri=kiri; gerakKanan=kanan} }
-document.getElementById('btnKiri').addEventListener('touchstart',e=>{e.preventDefault(); setGerak(true,false)}); document.getElementById('btnKiri').addEventListener('touchend',e=>{e.preventDefault(); setGerak(false,false)}); document.getElementById('btnKiri').onmousedown=()=>setGerak(true,false); document.getElementById('btnKiri').onmouseup=()=>setGerak(false,false);
-document.getElementById('btnKanan').addEventListener('touchstart',e=>{e.preventDefault(); setGerak(false,true)}); document.getElementById('btnKanan').addEventListener('touchend',e=>{e.preventDefault(); setGerak(false,false)}); document.getElementById('btnKanan').onmousedown=()=>setGerak(false,true); document.getElementById('btnKanan').onmouseup=()=>setGerak(false,false);
-document.getElementById('btnTembak').addEventListener('touchstart',e=>{e.preventDefault(); tembak()}); document.getElementById('btnTembak').onmousedown=()=>tembak();
-document.getElementById('btnStart').onclick=startGame; document.getElementById('btnStart').ontouchstart=e=>{e.preventDefault(); startGame()}; document.getElementById('btnStop').onclick=stopGame; document.getElementById('btnStop').ontouchstart=e=>{e.preventDefault(); stopGame()};
+// 3. MUSUH + LEVEL
+function spawnMusuh(){
+    musuh = [];
+    let jumlah = 5 + level * 2;
+    for(let i=0; i<jumlah; i++){
+        let jenis = 'normal';
+        if(level >= 3 && i % 3 == 0) jenis = 'cepat';
+        if(level >= 6 && i % 4 == 0) jenis = 'penembak';
+        if(level >= 10 && i % 5 == 0) jenis = 'raksasa';
 
-function spawnSatuMusuh(){
-    let speedMusuh = 1.5+Math.random()*2+level*0.5;
-    let rand = Math.random();
-    let jenis = 'biasa';
-    let hp = 1;
-    if(level >= 7 && rand < 0.15){ jenis = 'bomber'; hp = 2; }
-    else if(level >= 6 && rand < 0.25){ jenis = 'penembak'; hp = 2; }
-    else if(level >= 5 && rand < 0.2){ jenis = 'tank'; hp = 5; speedMusuh *= 0.5; }
-    else if(level >= 3 && rand < 0.3){ jenis = 'cepat'; speedMusuh *= 2; }
-    else if(rand < 0.1 + level*0.08){ jenis = 'raksasa'; hp = 3 + level*2; }
-    musuh.push({x:Math.random()*c.width, y:-80, w:30, h:60, s:speedMusuh, jenis:jenis, hp:hp, maxHp:hp, timer:0})
+        musuh.push({
+            x: Math.random()*(canvas.width-40), 
+            y: Math.random()*100, 
+            w: jenis=='raksasa'?60:40, 
+            h: jenis=='raksasa'?60:40,
+            speed: jenis=='cepat'?3:1.5, 
+            hp: jenis=='raksasa'?5:1,
+            jenis: jenis,
+            cdTembak: Math.random()*100
+        });
+    }
 }
 
-function startGame(){
-    if(gameJalan) return;
-    gameJalan=true; skor=0; level=1; ammo=999; musuh=[]; peluru=[]; peluruMusuh=[]; boom=[]; darahItem=[]; ukuran=1; kill=0; nyawa=100; px=c.width/2; py=c.height-180; updateHUD(); document.getElementById('sizeFill').style.width = '0%';
-    for(let i=0; i<3; i++){ spawnSatuMusuh(); }
-    let spawnSpeed = 700 - level*40; if(spawnSpeed < 200) spawnSpeed = 200;
-    spawnMusuh = setInterval(()=>{ if(gameJalan){ spawnSatuMusuh(); } }, spawnSpeed);
-    main();
+// 4. TEMBAK PLAYER - BIRU
+function tembak(){
+    if(player.cd <= 0){
+        peluru.push({x: player.x+player.w/2-2, y: player.y, w: 4, h: 15, speed: 10, col: '#00aaff'});
+        player.cd = 15;
+    }
 }
 
-function stopGame(){gameJalan=false; clearInterval(spawnMusuh); let kedip = 0; let efek = setInterval(()=>{kedip++; x.fillStyle = kedip % 2 === 0? 'rgba(255,0,0,0.5)' : 'rgba(0,0,0,0.8)'; x.fillRect(0,0,c.width,c.height); if(kedip >= 6){clearInterval(efek); x.clearRect(0,0,c.width,c.height); x.fillStyle='rgba(0,0,0,0.8)'; x.fillRect(0,0,c.width,c.height); x.fillStyle='red'; x.font='50px Arial Black'; x.textAlign='center'; x.fillText('GAME OVER', c.width/2, c.height/2-30); x.fillStyle='white'; x.font='24px Arial'; x.fillText('Level: '+level+' | Skor Akhir: '+skor, c.width/2, c.height/2+10); x.font='20px Arial'; x.fillText('Create by Mohady', c.width/2, c.height/2+40); x.font='16px Arial'; x.fillText('Tekan START untuk main lagi', c.width/2, c.height/2+70);}}, 150);}
-function tembak(){if(ammo>0 && gameJalan){peluru.push({x:px, y:py-30-20*ukuran}); ammo--; suara('tembak'); updateHUD();}}
-
+// 5. TEMBAK MUSUH - KUNING BOLA
 function tembakMusuh(m){
-    // SEMUA MUSUH YANG NEMBAK PELURUNYA JADI BOLA
-    peluruMusuh.push({x:m.x, y:m.y+30, s:5+level*0.8});
+    if(m.jenis == 'raksasa'){
+        for(let i=-1;i<=1;i++){ // tembak 3 sekaligus
+            peluruMusuh.push({x:m.x+m.w/2+i*15, y:m.y+m.h, r:8, speed:3, col:'#ffff00'});
+        }
+    }else{
+        peluruMusuh.push({x:m.x+m.w/2, y:m.y+m.h, r:5, speed:4, col:'#ffff00'});
+    }
 }
 
-function main(){if(!gameJalan) return; requestAnimationFrame(main); x.clearRect(0,0,c.width,c.height); x.fillStyle='#0a1a3a'; x.fillRect(0,0,c.width,c.height); x.fillStyle='#004080'; x.fillRect(0,c.height-80,c.width,80);
-for(let i=0;i<salju.length;i++){let s=salju[i]; x.fillStyle='white'; x.beginPath(); x.arc(s.x,s.y,s.r,0,6.28); x.fill(); s.y+=s.s; s.x+=s.w; if(s.y>c.height){s.y=0; s.x=Math.random()*c.width;}}
-if(Math.random() < 0.02){darahItem.push({x: Math.random()*c.width, y: 0, r: 12});}
-for(let i=darahItem.length-1; i>=0; i--){let d = darahItem[i]; d.y += 2; x.fillStyle = "red"; x.beginPath(); x.arc(d.x, d.y, d.r, 0, Math.PI*2); x.fill(); if(Math.hypot(px-d.x, py-d.y) < 25*ukuran){nyawa = Math.min(120, nyawa + 20); ukuran += 0.2; if(ukuran > 2.5) ukuran = 2.5; darahItem.splice(i,1); suara('isi'); updateHUD();} else if(d.y > c.height) darahItem.splice(i,1);}
-let kecepatan = 10 - ukuran*2; if(kecepatan < 2) kecepatan = 2; if(gerakKiri && px > 30*ukuran) px -= kecepatan; if(gerakKanan && px < c.width - 30*ukuran) px += kecepatan; gambarPlayer(px, py);
-for(let i=peluru.length-1;i>=0;i--){let p=peluru[i]; p.y-=22; x.fillStyle='yellow'; x.beginPath(); x.arc(p.x,p.y,6,0,6.28); x.fill(); if(p.y<0) peluru.splice(i,1);}
+// 6. LOOP UTAMA
+function loop(){
+    if(!gameJalan) return;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
 
-// FIX FINAL: SEMUA PELURU MUSUH = BOLA MERAH
-for(let i=peluruMusuh.length-1;i>=0;i--){
-    let p=peluruMusuh[i]; p.y+=p.s; 
-    x.fillStyle='red';
-    x.beginPath(); x.arc(p.x,p.y,8,0,6.28); x.fill(); // BOLA
-    
-    if(p.y>py && Math.abs(p.x-px)<20*ukuran){nyawa-=10; peluruMusuh.splice(i,1); suara('kena'); updateHUD();} else if(p.y>c.height) peluruMusuh.splice(i,1);
+    // Gambar bintang
+    bintang.forEach(b => {
+        b.y += b.s;
+        if(b.y > canvas.height) b.y = 0;
+        ctx.fillStyle = 'white';
+        ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,6.28); ctx.fill();
+    });
+
+    // Gerak player
+    if(tombol['a'] || tombol['ArrowLeft']) player.x -= player.speed;
+    if(tombol['d'] || tombol['ArrowRight']) player.x += player.speed;
+    player.x = Math.max(0, Math.min(canvas.width-player.w, player.x));
+    if(player.cd > 0) player.cd--;
+
+    // Gambar player
+    ctx.fillStyle = '#00aaff';
+    ctx.fillRect(player.x, player.y, player.w, player.h);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(player.x+player.w/2-2, player.y-10, 4, 10);
+
+    // Update peluru player
+    peluru.forEach((p,i) => {
+        p.y -= p.speed;
+        ctx.fillStyle = p.col;
+        ctx.fillRect(p.x, p.y, p.w, p.h);
+        if(p.y < 0) peluru.splice(i,1);
+    });
+
+    // Update musuh
+    musuh.forEach((m,i) => {
+        m.y += m.speed;
+        m.cdTembak--;
+        
+        // Gambar musuh beda warna
+        if(m.jenis=='cepat') ctx.fillStyle='#ff00ff';
+        else if(m.jenis=='penembak') ctx.fillStyle='#0088ff';
+        else if(m.jenis=='raksasa') ctx.fillStyle='#ff0000';
+        else ctx.fillStyle='#ff6600';
+        ctx.fillRect(m.x, m.y, m.w, m.h);
+
+        // Musuh nembak
+        if((m.jenis=='penembak' || m.jenis=='raksasa') && m.cdTembak <= 0){
+            tembakMusuh(m);
+            m.cdTembak = 100 - level*5;
+        }
+        
+        // Tabrak player
+        if(m.y+m.h > player.y && m.x < player.x+player.w && m.x+m.w > player.x){
+            nyawa--; updateUI(); musuh.splice(i,1);
+        }
+        if(m.y > canvas.height) musuh.splice(i,1);
+    });
+
+    // Update peluru musuh - BOLA KUNING
+    peluruMusuh.forEach((p,i) => {
+        p.y += p.speed;
+        ctx.fillStyle = p.col;
+        ctx.beginPath(); // <-- INI BIKIN JADI BOLA
+        ctx.arc(p.x, p.y, p.r, 0, 6.28);
+        ctx.fill();
+        
+        if(p.y > canvas.height) peluruMusuh.splice(i,1);
+        // Kena player
+        if(p.y > player.y && p.x > player.x && p.x < player.x+player.w){
+            nyawa--; updateUI(); peluruMusuh.splice(i,1);
+        }
+    });
+
+    // Tabrakan peluru vs musuh
+    peluru.forEach((p,pi) => {
+        musuh.forEach((m,mi) => {
+            if(p.x > m.x && p.x < m.x+m.w && p.y > m.y && p.y < m.y+m.h){
+                m.hp--;
+                if(m.hp <= 0){
+                    skor += m.jenis=='raksasa'?50:10;
+                    musuh.splice(mi,1);
+                }
+                peluru.splice(pi,1);
+                updateUI();
+            }
+        });
+    });
+
+    // Naik level
+    if(musuh.length == 0){
+        level++; spawnMusuh(); updateUI();
+    }
+
+    // Game over
+    if(nyawa <= 0){ 
+        gameJalan = false; 
+        alert('GAME OVER! Skor: ' + skor);
+        document.getElementById('start').style.display = 'block';
+    }
+
+    requestAnimationFrame(loop);
 }
 
-for(let i=musuh.length-1;i>=0;i--){
-    let m=musuh[i]; m.y+=m.s; m.timer++; 
-    // BIKIN SEMUA MUSUH BISA NEMBAK TIAP 2 DETIK
-    if(m.timer>120){tembakMusuh(m); m.timer=0;} 
-    gambarMusuh(m); if(m.y>c.height) musuh.splice(i,1);
+function updateUI(){
+    document.getElementById('skor').innerText = skor;
+    document.getElementById('level').innerText = level;
+    document.getElementById('nyawa').innerText = nyawa;
 }
-for(let i=boom.length-1;i>=0;i--){let b=boom[i]; b.x+=b.vx; b.y+=b.vy; b.life--; x.fillStyle=`rgba(255,200,0,${b.life/35})`; x.beginPath(); x.arc(b.x,b.y,14,0,6.28); x.fill(); if(b.life<=0) boom.splice(i,1);}
-for(let i=peluru.length-1;i>=0;i--){ for(let j=musuh.length-1;j>=0;j--){ let p=peluru[i]; let m=musuh[j]; let size = m.jenis=='raksasa'? 20 : 10; if(p && m && p.x>m.x-size && p.x<m.x+size && p.y>m.y-40 && p.y<m.y+40){ m.hp--; peluru.splice(i,1); if(m.hp<=0){
-    if(m.jenis == 'bomber'){ ledakan(m.x,m.y,true); nyawa-=15; suara('kena'); updateHUD(); }
-    else { ledakan(m.x,m.y,m.jenis=='raksasa'); }
-    musuh.splice(j,1); skor+=10*level; if(Math.random() < 0.3){darahItem.push({x:m.x,y:m.y, r:12});} ammo+=3; if(ammo>999) ammo=999; suara('isi'); kill++; cekNaikLevel(); ukuran += 0.05; if(ukuran > 2.5) ukuran = 2.5; updateHUD();
-} break; }}}
-let sekarang = Date.now(); if(!window.lastKena) window.lastKena = 0; for(let i=0;i<musuh.length;i++){let m=musuh[i]; let jarak = m.jenis=='raksasa'? 40*ukuran : 25*ukuran; if(Math.hypot(px-m.x, py-m.y) < jarak){if(sekarang - window.lastKena > 500){nyawa -= m.jenis=='raksasa'?15:5; if(nyawa <= 0){stopGame(); return;} window.lastKena = sekarang; suara('kena'); updateHUD();}}}
+
+function mulai(){
+    skor=0; level=1; nyawa=3; peluru=[]; musuh=[]; peluruMusuh=[]; partikel=[];
+    buatPlayer(); buatBintang(); spawnMusuh(); updateUI();
+    document.getElementById('start').style.display = 'none';
+    gameJalan = true; loop();
 }
+
+// Kontrol
+document.addEventListener('keydown', e => { tombol[e.key] = true; if(e.key==' ') tembak(); });
+document.addEventListener('keyup', e => { tombol[e.key] = false; });
+
 </script>
 </body>
 </html>
-
-<!--v2-->
