@@ -34,6 +34,7 @@ html,body{height:100%}
 <script>
 let c = document.getElementById('c');let x = c.getContext('2d');let ukuran = 1;
 let px, py;
+let lastShotTime = 0; // TAMBAHAN BUAT COOLDOWN
 function resize(){c.width = window.innerWidth; c.height = window.innerHeight; px = c.width/2; py = c.height - 180;}
 resize(); window.addEventListener('resize', resize);
 
@@ -96,7 +97,7 @@ function cekNaikLevel(){
         level++;
         let pesan = "LEVEL UP! SEKARANG LEVEL " + level;
         if(level==3) pesan += "\nMUSUH BARU: CEPAT UNGU!";
-        if(level==5) pesan += "\nMUSUH BARU: TANK HIJAU DARAH TEBEL!";
+        if(level==5) pesan += "\nMUSUH BARU: TANK HIJAU DARAH TEBEL!\nTRIPLE SHOT UNLOCKED!"; // TAMBAHAN PESAN
         if(level==6) pesan += "\nMUSUH BARU: PENEMBAK BIRU!";
         if(level==7) pesan += "\nMUSUH BARU: BOMBER MERAH MELEDAK!";
         alert(pesan);
@@ -132,7 +133,30 @@ function startGame(){
 }
 
 function stopGame(){gameJalan=false; clearInterval(spawnMusuh); let kedip = 0; let efek = setInterval(()=>{kedip++; x.fillStyle = kedip % 2 === 0? 'rgba(255,0,0,0.5)' : 'rgba(0,0,0,0.8)'; x.fillRect(0,0,c.width,c.height); if(kedip >= 6){clearInterval(efek); x.clearRect(0,0,c.width,c.height); x.fillStyle='rgba(0,0,0,0.8)'; x.fillRect(0,0,c.width,c.height); x.fillStyle='red'; x.font='50px Arial Black'; x.textAlign='center'; x.fillText('GAME OVER', c.width/2, c.height/2-30); x.fillStyle='white'; x.font='24px Arial'; x.fillText('Level: '+level+' | Skor Akhir: '+skor, c.width/2, c.height/2+10); x.font='20px Arial'; x.fillText('Create by Mohady', c.width/2, c.height/2+40); x.font='16px Arial'; x.fillText('Tekan START untuk main lagi', c.width/2, c.height/2+70);}}, 150);}
-function tembak(){if(ammo>0 && gameJalan){peluru.push({x:px, y:py-30-20*ukuran}); ammo--; suara('tembak'); updateHUD();}}
+
+// FUNGSI TEMBAK BARU - BERCABANG LEVEL 5+
+function tembak(){
+    if(ammo>0 && gameJalan){
+        const now = Date.now();
+        if(now - lastShotTime > 150){ // jeda 0.15 detik
+            lastShotTime = now;
+            let startY = py-30-20*ukuran;
+
+            if(level <= 4){
+                // Level 1-4: 1 peluru lurus
+                peluru.push({x:px, y:startY, vx:0});
+            } else {
+                // Level 5+: 3 peluru bercabang
+                peluru.push({x:px, y:startY, vx:0}); // tengah
+                peluru.push({x:px, y:startY, vx:-3}); // kiri
+                peluru.push({x:px, y:startY, vx:3}); // kanan
+            }
+            ammo--;
+            suara('tembak');
+            updateHUD();
+        }
+    }
+}
 
 // PELURU MUSUH JADI KUNING
 function tembakMusuh(m){
@@ -144,7 +168,16 @@ for(let i=0;i<salju.length;i++){let s=salju[i]; x.fillStyle='white'; x.beginPath
 if(Math.random() < 0.02){darahItem.push({x: Math.random()*c.width, y: 0, r: 12});}
 for(let i=darahItem.length-1; i>=0; i--){let d = darahItem[i]; d.y += 2; x.fillStyle = "red"; x.beginPath(); x.arc(d.x, d.y, d.r, 0, Math.PI*2); x.fill(); if(Math.hypot(px-d.x, py-d.y) < 25*ukuran){nyawa = Math.min(120, nyawa + 20); ukuran += 0.2; if(ukuran > 2.5) ukuran = 2.5; darahItem.splice(i,1); suara('isi'); updateHUD();} else if(d.y > c.height) darahItem.splice(i,1);}
 let kecepatan = 10 - ukuran*2; if(kecepatan < 2) kecepatan = 2; if(gerakKiri && px > 30*ukuran) px -= kecepatan; if(gerakKanan && px < c.width - 30*ukuran) px += kecepatan; gambarPlayer(px, py);
-for(let i=peluru.length-1;i>=0;i--){let p=peluru[i]; p.y-=22; x.fillStyle='yellow'; x.beginPath(); x.arc(p.x,p.y,6,0,6.28); x.fill(); if(p.y<0) peluru.splice(i,1);}
+
+// UPDATE PELURU PLAYER + GERAK BERCABANG
+for(let i=peluru.length-1;i>=0;i--){
+    let p=peluru[i];
+    p.y-=22;
+    p.x+=p.vx; // TAMBAHAN: biar bisa miring
+    x.fillStyle='yellow'; // WARNA TETEP KUNING
+    x.beginPath(); x.arc(p.x,p.y,6,0,6.28); x.fill();
+    if(p.y<0) peluru.splice(i,1);
+}
 
 // SEMUA PELURU MUSUH = BOLA KUNING
 for(let i=peluruMusuh.length-1;i>=0;i--){
@@ -172,4 +205,4 @@ let sekarang = Date.now(); if(!window.lastKena) window.lastKena = 0; for(let i=0
 </body>
 </html>
 
-<!--v4-->
+<!--v6-->
