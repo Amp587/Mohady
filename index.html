@@ -22,7 +22,7 @@ html,body{height:100%}
 </head>
 <body>
 <div id="hud"> Level: 1 | Skor: 0 | Darah: 100</div>
-<div id="credit">by Mohady V2</div>
+<div id="credit">by Mohady V3 - Peluru Infinite</div>
 <div id="sizeBar"><div id="sizeFill"></div></div>
 <div id="healthBar"><div id="healthFill"></div></div>
 <div id="btnKiri" class="btn">◀️</div>
@@ -34,11 +34,11 @@ html,body{height:100%}
 <script>
 let c = document.getElementById('c');let x = c.getContext('2d');let ukuran = 1;
 let px, py;
-let lastShotTime = 0; // TAMBAHAN BUAT COOLDOWN
+let lastShotTime = 0; // BUAT COOLDOWN
 function resize(){c.width = window.innerWidth; c.height = window.innerHeight; px = c.width/2; py = c.height - 180;}
 resize(); window.addEventListener('resize', resize);
 
-let kill = 0; let musuh = [], peluru = [], peluruMusuh = [], boom = [], salju = [], skor = 0, nyawa = 100, darahItem = [], ammo = 999;
+let kill = 0; let musuh = [], peluru = [], peluruMusuh = [], boom = [], salju = [], skor = 0, nyawa = 100, darahItem = [];
 let level = 1;
 let gerakKiri = false, gerakKanan = false, gameJalan = false; let spawnMusuh;
 for(let i=0; i<100; i++){salju.push({x:Math.random()*c.width, y:Math.random()*c.height, r:Math.random()*3+1, s:Math.random()*2+1, w:Math.random()*0.5-0.25})}
@@ -97,7 +97,7 @@ function cekNaikLevel(){
         level++;
         let pesan = "LEVEL UP! SEKARANG LEVEL " + level;
         if(level==3) pesan += "\nMUSUH BARU: CEPAT UNGU!";
-        if(level==5) pesan += "\nMUSUH BARU: TANK HIJAU DARAH TEBEL!\nTRIPLE SHOT UNLOCKED!"; // TAMBAHAN PESAN
+        if(level==5) pesan += "\nMUSUH BARU: TANK HIJAU DARAH TEBEL!\nTRIPLE SHOT UNLOCKED!";
         if(level==6) pesan += "\nMUSUH BARU: PENEMBAK BIRU!";
         if(level==7) pesan += "\nMUSUH BARU: BOMBER MERAH MELEDAK!";
         alert(pesan);
@@ -125,7 +125,9 @@ function spawnSatuMusuh(){
 
 function startGame(){
     if(gameJalan) return;
-    gameJalan=true; skor=0; level=1; ammo=999; musuh=[]; peluru=[]; peluruMusuh=[]; boom=[]; darahItem=[]; ukuran=1; kill=0; nyawa=100; px=c.width/2; py=c.height-180; updateHUD(); document.getElementById('sizeFill').style.width = '0%';
+    gameJalan=true; skor=0; level=1;
+    // AMMO DIHAPUS - PELURU INFINITE
+    musuh=[]; peluru=[]; peluruMusuh=[]; boom=[]; darahItem=[]; ukuran=1; kill=0; nyawa=100; px=c.width/2; py=c.height-180; updateHUD(); document.getElementById('sizeFill').style.width = '0%';
     for(let i=0; i<3; i++){ spawnSatuMusuh(); }
     let spawnSpeed = 700 - level*40; if(spawnSpeed < 200) spawnSpeed = 200;
     spawnMusuh = setInterval(()=>{ if(gameJalan){ spawnSatuMusuh(); } }, spawnSpeed);
@@ -134,9 +136,9 @@ function startGame(){
 
 function stopGame(){gameJalan=false; clearInterval(spawnMusuh); let kedip = 0; let efek = setInterval(()=>{kedip++; x.fillStyle = kedip % 2 === 0? 'rgba(255,0,0,0.5)' : 'rgba(0,0,0,0.8)'; x.fillRect(0,0,c.width,c.height); if(kedip >= 6){clearInterval(efek); x.clearRect(0,0,c.width,c.height); x.fillStyle='rgba(0,0,0,0.8)'; x.fillRect(0,0,c.width,c.height); x.fillStyle='red'; x.font='50px Arial Black'; x.textAlign='center'; x.fillText('GAME OVER', c.width/2, c.height/2-30); x.fillStyle='white'; x.font='24px Arial'; x.fillText('Level: '+level+' | Skor Akhir: '+skor, c.width/2, c.height/2+10); x.font='20px Arial'; x.fillText('Create by Mohady', c.width/2, c.height/2+40); x.font='16px Arial'; x.fillText('Tekan START untuk main lagi', c.width/2, c.height/2+70);}}, 150);}
 
-// FUNGSI TEMBAK BARU - BERCABANG LEVEL 5+
+// FUNGSI TEMBAK BARU - PELURU TAK TERBATAS + BERCABANG LEVEL 5+
 function tembak(){
-    if(ammo>0 && gameJalan){
+    if(gameJalan){
         const now = Date.now();
         if(now - lastShotTime > 150){ // jeda 0.15 detik
             lastShotTime = now;
@@ -151,7 +153,6 @@ function tembak(){
                 peluru.push({x:px, y:startY, vx:-3}); // kiri
                 peluru.push({x:px, y:startY, vx:3}); // kanan
             }
-            ammo--;
             suara('tembak');
             updateHUD();
         }
@@ -173,7 +174,7 @@ let kecepatan = 10 - ukuran*2; if(kecepatan < 2) kecepatan = 2; if(gerakKiri && 
 for(let i=peluru.length-1;i>=0;i--){
     let p=peluru[i];
     p.y-=22;
-    p.x+=p.vx; // TAMBAHAN: biar bisa miring
+    p.x+=p.vx; // biar bisa miring
     x.fillStyle='yellow'; // WARNA TETEP KUNING
     x.beginPath(); x.arc(p.x,p.y,6,0,6.28); x.fill();
     if(p.y<0) peluru.splice(i,1);
@@ -197,7 +198,9 @@ for(let i=boom.length-1;i>=0;i--){let b=boom[i]; b.x+=b.vx; b.y+=b.vy; b.life--;
 for(let i=peluru.length-1;i>=0;i--){ for(let j=musuh.length-1;j>=0;j--){ let p=peluru[i]; let m=musuh[j]; let size = m.jenis=='raksasa'? 20 : 10; if(p && m && p.x>m.x-size && p.x<m.x+size && p.y>m.y-40 && p.y<m.y+40){ m.hp--; peluru.splice(i,1); if(m.hp<=0){
     if(m.jenis == 'bomber'){ ledakan(m.x,m.y,true); nyawa-=15; suara('kena'); updateHUD(); }
     else { ledakan(m.x,m.y,m.jenis=='raksasa'); }
-    musuh.splice(j,1); skor+=10*level; if(Math.random() < 0.3){darahItem.push({x:m.x,y:m.y, r:12});} ammo+=3; if(ammo>999) ammo=999; suara('isi'); kill++; cekNaikLevel(); ukuran += 0.05; if(ukuran > 2.5) ukuran = 2.5; updateHUD();
+    musuh.splice(j,1); skor+=10*level; if(Math.random() < 0.3){darahItem.push({x:m.x,y:m.y, r:12});}
+    // AMMO DITAMBAH DIHAPUS
+    suara('isi'); kill++; cekNaikLevel(); ukuran += 0.05; if(ukuran > 2.5) ukuran = 2.5; updateHUD();
 } break; }}}
 let sekarang = Date.now(); if(!window.lastKena) window.lastKena = 0; for(let i=0;i<musuh.length;i++){let m=musuh[i]; let jarak = m.jenis=='raksasa'? 40*ukuran : 25*ukuran; if(Math.hypot(px-m.x, py-m.y) < jarak){if(sekarang - window.lastKena > 500){nyawa -= m.jenis=='raksasa'?15:5; if(nyawa <= 0){stopGame(); return;} window.lastKena = sekarang; suara('kena'); updateHUD();}}}
 }
@@ -205,4 +208,4 @@ let sekarang = Date.now(); if(!window.lastKena) window.lastKena = 0; for(let i=0
 </body>
 </html>
 
-<!--v6-->
+<!--v7-->
