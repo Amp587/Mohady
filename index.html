@@ -29,7 +29,7 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-let player, peluru, musuh, peluruMusuh, partikel, bintang;
+let player, peluru = [], musuh = [], peluruMusuh = [], partikel = [], bintang = [];
 let skor = 0, level = 1, nyawa = 3, gameJalan = false;
 let tombol = {};
 
@@ -77,14 +77,14 @@ function tembak(){
     }
 }
 
-// 5. TEMBAK MUSUH - KUNING BOLA
+// 5. TEMBAK MUSUH - KUNING BOLA FIX
 function tembakMusuh(m){
     if(m.jenis == 'raksasa'){
-        for(let i=-1;i<=1;i++){ // tembak 3 sekaligus
+        for(let i=-1;i<=1;i++){ // raksasa nembak 3 sekaligus
             peluruMusuh.push({x:m.x+m.w/2+i*15, y:m.y+m.h, r:8, speed:3, col:'#ffff00'});
         }
-    }else{
-        peluruMusuh.push({x:m.x+m.w/2, y:m.y+m.h, r:5, speed:4, col:'#ffff00'});
+    }else{ // penembak
+        peluruMusuh.push({x:m.x+m.w/2, y:m.y+m.h, r:6, speed:4, col:'#ffff00'});
     }
 }
 
@@ -127,10 +127,10 @@ function loop(){
         m.cdTembak--;
         
         // Gambar musuh beda warna
-        if(m.jenis=='cepat') ctx.fillStyle='#ff00ff';
-        else if(m.jenis=='penembak') ctx.fillStyle='#0088ff';
-        else if(m.jenis=='raksasa') ctx.fillStyle='#ff0000';
-        else ctx.fillStyle='#ff6600';
+        if(m.jenis=='cepat') ctx.fillStyle='#ff00ff'; // pink
+        else if(m.jenis=='penembak') ctx.fillStyle='#0088ff'; // biru
+        else if(m.jenis=='raksasa') ctx.fillStyle='#ff0000'; // merah
+        else ctx.fillStyle='#ff6600'; // oranye
         ctx.fillRect(m.x, m.y, m.w, m.h);
 
         // Musuh nembak
@@ -146,11 +146,11 @@ function loop(){
         if(m.y > canvas.height) musuh.splice(i,1);
     });
 
-    // Update peluru musuh - BOLA KUNING
+    // 7. UPDATE PELURU MUSUH - BOLA KUNING FIX
     peluruMusuh.forEach((p,i) => {
         p.y += p.speed;
-        ctx.fillStyle = p.col;
-        ctx.beginPath(); // <-- INI BIKIN JADI BOLA
+        ctx.fillStyle = p.col; // #ffff00
+        ctx.beginPath(); // BIKIN JADI BOLA
         ctx.arc(p.x, p.y, p.r, 0, 6.28);
         ctx.fill();
         
@@ -211,5 +211,3 @@ document.addEventListener('keyup', e => { tombol[e.key] = false; });
 </script>
 </body>
 </html>
-
-<--v3-->
