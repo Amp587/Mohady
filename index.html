@@ -47,11 +47,13 @@ function suara(tipe){if(!gameJalan) return; if(!audioCtx) audioCtx = new (window
 function gambarPlayer(px,py){
     var s = ukuran;
     x.fillStyle = 'yellow'; x.strokeStyle = 'black'; x.lineWidth = 2*s;
-    x.fillRect(px-12*s, py-40*s, 24*s, 24*s);
-    x.fillStyle = 'black'; x.fillRect(px-7*s, py-33*s, 4*s, 4*s); x.fillRect(px+3*s, py-33*s, 4*s, 4*s);
-    x.fillStyle = 'yellow'; x.fillRect(px-15*s, py-16*s, 30*s, 25*s);
-    x.fillRect(px-22*s, py-10*s, 7*s, 15*s); x.fillRect(px+15*s, py-10*s, 7*s, 15*s);
-    x.fillRect(px-12*s, py+9*s, 9*s, 18*s); x.fillRect(px+3*s, py+9*s, 9*s, 18*s);
+    x.fillRect(px-12*s, py-40*s, 24*s, 24*s); // kepala
+    x.fillStyle = 'black'; x.fillRect(px-7*s, py-33*s, 4*s, 4*s); x.fillRect(px+3*s, py-33*s, 4*s, 4*s); // mata
+    x.fillStyle = 'red'; x.fillRect(px-15*s, py-16*s, 30*s, 25*s); // baju merah
+    x.fillStyle = 'yellow'; x.fillRect(px-22*s, py-10*s, 7*s, 15*s); x.fillRect(px+15*s, py-10*s, 7*s, 15*s); // tangan
+    x.strokeStyle = 'white'; x.lineWidth = 4*s; // FIX: KAKI PUTIH BIAR KELIHATAN
+    x.beginPath(); x.moveTo(px-8*s, py+9*s); x.lineTo(px-8*s, py+27*s); x.stroke();
+    x.beginPath(); x.moveTo(px+8*s, py+9*s); x.lineTo(px+8*s, py+27*s); x.stroke();
 }
 
 // 5 JENIS MUSUH + RAKSASA
@@ -92,7 +94,6 @@ function updateHUD(){document.getElementById('sizeFill').style.width = (ukuran/2
 function cekNaikLevel(){
     let targetScore = level * 500 - 400;
     if(level == 1) targetScore = 100;
-
     if(skor >= targetScore){
         level++;
         let pesan = "LEVEL UP! SEKARANG LEVEL " + level;
@@ -115,14 +116,11 @@ function spawnSatuMusuh(){
     let rand = Math.random();
     let jenis = 'biasa';
     let hp = 1;
-
-    // LOGIKA SPAWN BERDASARKAN LEVEL
-    if(level >= 7 && rand < 0.15){ jenis = 'bomber'; hp = 2; } // 15%
-    else if(level >= 6 && rand < 0.25){ jenis = 'penembak'; hp = 2; } // 25%
-    else if(level >= 5 && rand < 0.2){ jenis = 'tank'; hp = 5; speedMusuh *= 0.5; } // 20% lambat
-    else if(level >= 3 && rand < 0.3){ jenis = 'cepat'; speedMusuh *= 2; } // 30% cepat
+    if(level >= 7 && rand < 0.15){ jenis = 'bomber'; hp = 2; }
+    else if(level >= 6 && rand < 0.25){ jenis = 'penembak'; hp = 2; }
+    else if(level >= 5 && rand < 0.2){ jenis = 'tank'; hp = 5; speedMusuh *= 0.5; }
+    else if(level >= 3 && rand < 0.3){ jenis = 'cepat'; speedMusuh *= 2; }
     else if(rand < 0.1 + level*0.08){ jenis = 'raksasa'; hp = 3 + level*2; }
-
     musuh.push({x:Math.random()*c.width, y:-80, w:30, h:60, s:speedMusuh, jenis:jenis, hp:hp, maxHp:hp, timer:0})
 }
 
@@ -138,11 +136,8 @@ function startGame(){
 function stopGame(){gameJalan=false; clearInterval(spawnMusuh); let kedip = 0; let efek = setInterval(()=>{kedip++; x.fillStyle = kedip % 2 === 0? 'rgba(255,0,0,0.5)' : 'rgba(0,0,0,0.8)'; x.fillRect(0,0,c.width,c.height); if(kedip >= 6){clearInterval(efek); x.clearRect(0,0,c.width,c.height); x.fillStyle='rgba(0,0,0,0.8)'; x.fillRect(0,0,c.width,c.height); x.fillStyle='red'; x.font='50px Arial Black'; x.textAlign='center'; x.fillText('GAME OVER', c.width/2, c.height/2-30); x.fillStyle='white'; x.font='24px Arial'; x.fillText('Level: '+level+' | Skor Akhir: '+skor, c.width/2, c.height/2+10); x.font='20px Arial'; x.fillText('Create by Mohady', c.width/2, c.height/2+40); x.font='16px Arial'; x.fillText('Tekan START untuk main lagi', c.width/2, c.height/2+70);}}, 150);}
 function tembak(){if(ammo>0 && gameJalan){peluru.push({x:px, y:py-30-20*ukuran}); ammo--; suara('tembak'); updateHUD();}}
 function tembakMusuh(m){
-    if(m.jenis == 'raksasa'){ peluruMusuh.push({x:m.x, y:m.y+50, s:5+level*0.8}); }
-    if(m.jenis == 'penembak' && m.timer>60){ // nembak 3 sekaligus
-        for(let i=-1; i<=1; i++) peluruMusuh.push({x:m.x+i*10, y:m.y+20, s:6});
-        m.timer=0;
-    }
+    if(m.jenis == 'raksasa'){ peluruMusuh.push({x:m.x, y:m.y+50, s:5+level*0.8, jenis:'bulat'}); } // FIX: TAMBAH JENIS BULAT
+    if(m.jenis == 'penembak' && m.timer>60){ for(let i=-1; i<=1; i++) peluruMusuh.push({x:m.x+i*10, y:m.y+20, s:6, jenis:'kotak'}); m.timer=0; }
 }
 
 function main(){if(!gameJalan) return; requestAnimationFrame(main); x.clearRect(0,0,c.width,c.height); x.fillStyle='#0a1a3a'; x.fillRect(0,0,c.width,c.height); x.fillStyle='#004080'; x.fillRect(0,c.height-80,c.width,80);
@@ -151,11 +146,22 @@ if(Math.random() < 0.02){darahItem.push({x: Math.random()*c.width, y: 0, r: 12})
 for(let i=darahItem.length-1; i>=0; i--){let d = darahItem[i]; d.y += 2; x.fillStyle = "red"; x.beginPath(); x.arc(d.x, d.y, d.r, 0, Math.PI*2); x.fill(); if(Math.hypot(px-d.x, py-d.y) < 25*ukuran){nyawa = Math.min(120, nyawa + 20); ukuran += 0.2; if(ukuran > 2.5) ukuran = 2.5; darahItem.splice(i,1); suara('isi'); updateHUD();} else if(d.y > c.height) darahItem.splice(i,1);}
 let kecepatan = 10 - ukuran*2; if(kecepatan < 2) kecepatan = 2; if(gerakKiri && px > 30*ukuran) px -= kecepatan; if(gerakKanan && px < c.width - 30*ukuran) px += kecepatan; gambarPlayer(px, py);
 for(let i=peluru.length-1;i>=0;i--){let p=peluru[i]; p.y-=22; x.fillStyle='yellow'; x.beginPath(); x.arc(p.x,p.y,6,0,6.28); x.fill(); if(p.y<0) peluru.splice(i,1);}
-for(let i=peluruMusuh.length-1;i>=0;i--){let p=peluruMusuh[i]; p.y+=p.s; x.fillStyle='orange'; x.fillRect(p.x-5,p.y,10,15); if(p.y>py && Math.abs(p.x-px)<20*ukuran){nyawa-=10; peluruMusuh.splice(i,1); suara('kena'); updateHUD();} else if(p.y>c.height) peluruMusuh.splice(i,1);}
+
+// FIX: PELURU MUSUH JADI 2 JENIS
+for(let i=peluruMusuh.length-1;i>=0;i--){
+    let p=peluruMusuh[i]; p.y+=p.s; 
+    if(p.jenis == 'bulat'){ // Punya raksasa
+        x.fillStyle='red'; x.beginPath(); x.arc(p.x,p.y,8,0,6.28); x.fill();
+    } else { // Punya penembak
+        x.fillStyle='orange'; x.fillRect(p.x-5,p.y,10,15);
+    }
+    if(p.y>py && Math.abs(p.x-px)<20*ukuran){nyawa-=10; peluruMusuh.splice(i,1); suara('kena'); updateHUD();} else if(p.y>c.height) peluruMusuh.splice(i,1);
+}
+
 for(let i=musuh.length-1;i>=0;i--){let m=musuh[i]; m.y+=m.s; m.timer++; if(m.jenis == 'raksasa' || m.jenis == 'penembak'){tembakMusuh(m);} gambarMusuh(m); if(m.y>c.height) musuh.splice(i,1);}
 for(let i=boom.length-1;i>=0;i--){let b=boom[i]; b.x+=b.vx; b.y+=b.vy; b.life--; x.fillStyle=`rgba(255,200,0,${b.life/35})`; x.beginPath(); x.arc(b.x,b.y,14,0,6.28); x.fill(); if(b.life<=0) boom.splice(i,1);}
 for(let i=peluru.length-1;i>=0;i--){ for(let j=musuh.length-1;j>=0;j--){ let p=peluru[i]; let m=musuh[j]; let size = m.jenis=='raksasa'? 20 : 10; if(p && m && p.x>m.x-size && p.x<m.x+size && p.y>m.y-40 && p.y<m.y+40){ m.hp--; peluru.splice(i,1); if(m.hp<=0){
-    if(m.jenis == 'bomber'){ ledakan(m.x,m.y,true); nyawa-=15; suara('kena'); updateHUD(); } // BOM MELEDAK
+    if(m.jenis == 'bomber'){ ledakan(m.x,m.y,true); nyawa-=15; suara('kena'); updateHUD(); }
     else { ledakan(m.x,m.y,m.jenis=='raksasa'); }
     musuh.splice(j,1); skor+=10*level; if(Math.random() < 0.3){darahItem.push({x:m.x,y:m.y, r:12});} ammo+=3; if(ammo>999) ammo=999; suara('isi'); kill++; cekNaikLevel(); ukuran += 0.05; if(ukuran > 2.5) ukuran = 2.5; updateHUD();
 } break; }}}
