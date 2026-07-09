@@ -47,11 +47,11 @@ function suara(tipe){if(!gameJalan) return; if(!audioCtx) audioCtx = new (window
 function gambarPlayer(px,py){
     var s = ukuran;
     x.fillStyle = 'yellow'; x.strokeStyle = 'black'; x.lineWidth = 2*s;
-    x.fillRect(px-12*s, py-40*s, 24*s, 24*s); // kepala
-    x.fillStyle = 'black'; x.fillRect(px-7*s, py-33*s, 4*s, 4*s); x.fillRect(px+3*s, py-33*s, 4*s, 4*s); // mata
-    x.fillStyle = 'red'; x.fillRect(px-15*s, py-16*s, 30*s, 25*s); // baju merah
-    x.fillStyle = 'yellow'; x.fillRect(px-22*s, py-10*s, 7*s, 15*s); x.fillRect(px+15*s, py-10*s, 7*s, 15*s); // tangan
-    x.strokeStyle = 'white'; x.lineWidth = 4*s; // FIX: KAKI PUTIH BIAR KELIHATAN
+    x.fillRect(px-12*s, py-40*s, 24*s, 24*s);
+    x.fillStyle = 'black'; x.fillRect(px-7*s, py-33*s, 4*s, 4*s); x.fillRect(px+3*s, py-33*s, 4*s, 4*s);
+    x.fillStyle = 'red'; x.fillRect(px-15*s, py-16*s, 30*s, 25*s);
+    x.fillStyle = 'yellow'; x.fillRect(px-22*s, py-10*s, 7*s, 15*s); x.fillRect(px+15*s, py-10*s, 7*s, 15*s);
+    x.strokeStyle = 'white'; x.lineWidth = 4*s; // KAKI PLAYER PUTIH
     x.beginPath(); x.moveTo(px-8*s, py+9*s); x.lineTo(px-8*s, py+27*s); x.stroke();
     x.beginPath(); x.moveTo(px+8*s, py+9*s); x.lineTo(px+8*s, py+27*s); x.stroke();
 }
@@ -67,7 +67,8 @@ function gambarMusuh(m){
         x.fillStyle = 'black'; x.fillRect(m.x-10*s, m.y-30*s, 5*s, 5*s); x.fillRect(m.x+5*s, m.y-30*s, 5*s, 5*s);
         x.strokeStyle='yellow'; x.lineWidth=5*s; x.beginPath(); x.moveTo(m.x-20*s, m.y); x.lineTo(m.x-35*s, m.y+20*s); x.stroke();
         x.beginPath(); x.moveTo(m.x+20*s, m.y); x.lineTo(m.x+35*s, m.y+20*s); x.stroke();
-        x.strokeStyle='black'; x.lineWidth=3*s; x.beginPath(); x.moveTo(m.x-10*s, m.y+40*s); x.lineTo(m.x-10*s, m.y+70*s); x.stroke();
+        x.strokeStyle='white'; x.lineWidth=3*s; // FIX: KAKI RAKSASA PUTIH
+        x.beginPath(); x.moveTo(m.x-10*s, m.y+40*s); x.lineTo(m.x-10*s, m.y+70*s); x.stroke();
         x.beginPath(); x.moveTo(m.x+10*s, m.y+40*s); x.lineTo(m.x+10*s, m.y+70*s); x.stroke();
         // BAR DARAH
         let barWidth = 40*s; let barHeight = 6*s; let hpPersen = m.hp / m.maxHp;
@@ -82,15 +83,14 @@ function gambarMusuh(m){
         x.strokeStyle='yellow'; x.lineWidth=3; // Tangan
         x.beginPath(); x.moveTo(m.x-8, m.y-5); x.lineTo(m.x-16, m.y+2); x.stroke();
         x.beginPath(); x.moveTo(m.x+8, m.y-5); x.lineTo(m.x+16, m.y+2); x.stroke();
-        x.strokeStyle='black'; x.lineWidth=2;
-        x.beginPath(); x.moveTo(m.x-4, m.y+5); x.lineTo(m.x-4, m.y+18); x.stroke(); // Kaki
+        x.strokeStyle='white'; x.lineWidth=2; // FIX: KAKI MUSUH KECIL PUTIH
+        x.beginPath(); x.moveTo(m.x-4, m.y+5); x.lineTo(m.x-4, m.y+18); x.stroke();
         x.beginPath(); x.moveTo(m.x+4, m.y+5); x.lineTo(m.x+4, m.y+18); x.stroke();
     }
 }
 function ledakan(px,py,besar){suara('kena'); let jumlah = besar? 40 : 20; for(let i=0; i<jumlah; i++) boom.push({x:px, y:py, vx:(Math.random()-0.5)*10, vy:(Math.random()-0.5)*10, life:besar?50:35})}
 function updateHUD(){document.getElementById('sizeFill').style.width = (ukuran/2.5*100) + '%'; document.getElementById('healthFill').style.width = (nyawa/120*100) + '%'; let tampilDarah = nyawa > 100? 100 : nyawa; document.getElementById('hud').innerText = 'Level: ' + level + ' | Skor: ' + skor + ' | Darah: ' + tampilDarah;}
 
-// SISTEM LEVEL TIAP 500
 function cekNaikLevel(){
     let targetScore = level * 500 - 400;
     if(level == 1) targetScore = 100;
@@ -136,7 +136,7 @@ function startGame(){
 function stopGame(){gameJalan=false; clearInterval(spawnMusuh); let kedip = 0; let efek = setInterval(()=>{kedip++; x.fillStyle = kedip % 2 === 0? 'rgba(255,0,0,0.5)' : 'rgba(0,0,0,0.8)'; x.fillRect(0,0,c.width,c.height); if(kedip >= 6){clearInterval(efek); x.clearRect(0,0,c.width,c.height); x.fillStyle='rgba(0,0,0,0.8)'; x.fillRect(0,0,c.width,c.height); x.fillStyle='red'; x.font='50px Arial Black'; x.textAlign='center'; x.fillText('GAME OVER', c.width/2, c.height/2-30); x.fillStyle='white'; x.font='24px Arial'; x.fillText('Level: '+level+' | Skor Akhir: '+skor, c.width/2, c.height/2+10); x.font='20px Arial'; x.fillText('Create by Mohady', c.width/2, c.height/2+40); x.font='16px Arial'; x.fillText('Tekan START untuk main lagi', c.width/2, c.height/2+70);}}, 150);}
 function tembak(){if(ammo>0 && gameJalan){peluru.push({x:px, y:py-30-20*ukuran}); ammo--; suara('tembak'); updateHUD();}}
 function tembakMusuh(m){
-    if(m.jenis == 'raksasa'){ peluruMusuh.push({x:m.x, y:m.y+50, s:5+level*0.8, jenis:'bulat'}); } // FIX: TAMBAH JENIS BULAT
+    if(m.jenis == 'raksasa'){ peluruMusuh.push({x:m.x, y:m.y+50, s:5+level*0.8, jenis:'bulat'}); }
     if(m.jenis == 'penembak' && m.timer>60){ for(let i=-1; i<=1; i++) peluruMusuh.push({x:m.x+i*10, y:m.y+20, s:6, jenis:'kotak'}); m.timer=0; }
 }
 
@@ -147,12 +147,12 @@ for(let i=darahItem.length-1; i>=0; i--){let d = darahItem[i]; d.y += 2; x.fillS
 let kecepatan = 10 - ukuran*2; if(kecepatan < 2) kecepatan = 2; if(gerakKiri && px > 30*ukuran) px -= kecepatan; if(gerakKanan && px < c.width - 30*ukuran) px += kecepatan; gambarPlayer(px, py);
 for(let i=peluru.length-1;i>=0;i--){let p=peluru[i]; p.y-=22; x.fillStyle='yellow'; x.beginPath(); x.arc(p.x,p.y,6,0,6.28); x.fill(); if(p.y<0) peluru.splice(i,1);}
 
-// FIX: PELURU MUSUH JADI 2 JENIS
+// FIX: PELURU MUSUH 2 JENIS
 for(let i=peluruMusuh.length-1;i>=0;i--){
     let p=peluruMusuh[i]; p.y+=p.s; 
-    if(p.jenis == 'bulat'){ // Punya raksasa
+    if(p.jenis == 'bulat'){ // PELURU RAKSASA BOLA MERAH
         x.fillStyle='red'; x.beginPath(); x.arc(p.x,p.y,8,0,6.28); x.fill();
-    } else { // Punya penembak
+    } else { // PELURU PENEMBAK KOTAK ORANGE
         x.fillStyle='orange'; x.fillRect(p.x-5,p.y,10,15);
     }
     if(p.y>py && Math.abs(p.x-px)<20*ukuran){nyawa-=10; peluruMusuh.splice(i,1); suara('kena'); updateHUD();} else if(p.y>c.height) peluruMusuh.splice(i,1);
